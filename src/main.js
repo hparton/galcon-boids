@@ -1,5 +1,5 @@
 import {Vector} from './vector.js';
-import {rand, radians} from './js/utils';
+import {rand, radians, map} from './js/utils';
 
 var windowWidth = window.innerWidth;
 var windowHeight = window.innerHeight;
@@ -12,6 +12,10 @@ ctx.canvas.height = windowHeight;
 
 
 var flock = new Flock();
+var death = new Sphere(800,800,true);
+var obstacle = new Sphere(300,300);
+var obstacle2 = new Sphere(500,500);
+var obstacle3 = new Sphere(500,650);
 
 function Flock() {
 	this.boids = [];
@@ -27,6 +31,51 @@ Flock.prototype.addBoid = function(boid) {
 	this.boids.push(boid);
 }
 
+Flock.prototype.removeBoid = function(index) {
+	this.boids.splice(index, 1);
+}
+
+function Sphere(x, y, type) {
+	this.r = 30;
+	this.position = new Vector(x,y);
+	if (!type) {
+		this.type = 'avoid';
+	} else {
+		this.type = 'void';
+	}
+}
+
+Sphere.prototype.run = function() {
+	var voidzone = this.r;
+
+	if (this.type == 'void') {
+		for (var i = 0; i < flock.boids.length; i++) {
+			flock.boids[i].applyForce(flock.boids[i].seek(this.position).multiply(2))
+
+			var distance = Vector.distance(this.position, flock.boids[i].position);
+
+			if ((distance > 0) && (distance < voidzone)) {
+				flock.removeBoid(i);
+			}
+		}
+	}
+
+	this.render();
+}
+
+Sphere.prototype.render = function() {
+	ctx.save();
+		if (this.type == 'void') {
+			ctx.fillStyle == 'black';
+		} else {
+			ctx.fillStyle = 'blue';
+		}
+		ctx.beginPath();
+		ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
+		ctx.fill();
+	ctx.restore();
+}
+
 function Boid(x,y) {
 	this.acceleration = new Vector(0,0);
 	this.velocity = new Vector(rand(-1,1,0.1), rand(-1,1,0.1));
@@ -34,6 +83,7 @@ function Boid(x,y) {
 	this.r = 3.0;
 	this.maxspeed = 3; // Max Speed
 	this.maxforce = 0.05; // Max steering force
+	this.fill = randomColor();
 }
 
 Boid.prototype.run = function(boids) {
@@ -46,7 +96,7 @@ Boid.prototype.run = function(boids) {
 Boid.prototype.render = function() {
   	var theta = this.velocity.toAngles() + radians(90);
 
-	ctx.strokeStyle = "red";
+	ctx.strokeStyle = this.fill;
 	ctx.save();
 		ctx.translate(this.position.x + this.r/2,this.position.y + this.r/2);
 		ctx.rotate(theta);
@@ -75,14 +125,17 @@ Boid.prototype.flock = function(boids) {
 	var sep = this.seperate(boids);
 	var coh = this.cohesion(boids);
 	var ali = this.align(boids);
+	var avo = this.avoid([obstacle3, obstacle2, obstacle]);
 
-	sep.multiply(1.5);
+	sep.multiply(3);
 	coh.multiply(1);
 	ali.multiply(1);
+	// avo.multiply(5);
 
 	this.applyForce(sep);
 	this.applyForce(ali);
 	this.applyForce(coh);
+	this.applyForce(avo);
 }
 
 
@@ -98,17 +151,12 @@ Boid.prototype.seek = function(target) {
 
 // Alignment
 Boid.prototype.align = function(boids) {
-	var neighbordist = 20;
 	var sum = new Vector(0,0);
 	var count = 0;
 
 	for (var i = 0; i < boids.length; i++) {
-		var distance = Vector.distance(this.position, boids[i].position);
-
-		if ((distance > 0) && (distance < neighbordist)) {
-			sum.add(boids[i].velocity);
-			count++;
-		}
+		sum.add(boids[i].velocity);
+		count++;
 	}
 
 	if (count > 0) {
@@ -126,17 +174,12 @@ Boid.prototype.align = function(boids) {
 
 // Cohesion
 Boid.prototype.cohesion = function(boids) {
-	var neighbordist = 20;
 	var sum = new Vector(0,0);
 	var count = 0;
 
 	for (var i = 0; i < boids.length; i++) {
-		var distance = Vector.distance(this.position, boids[i].position);
-
-		if ((distance > 0) && (distance < neighbordist)) {
-			sum.add(boids[i].position);
-			count++;
-		}
+		sum.add(boids[i].position);
+		count++;
 	}
 
 	if (count > 0) {
@@ -179,6 +222,61 @@ Boid.prototype.seperate = function(boids) {
 	return steer;
  }
 
+ Boid.prototype.avoid = function(objects) {
+ 	var lowest = 0;
+ 	var closest = {};
+ 	var steer = new Vector(0,0);
+
+	for (var i = 0; i < objects.length; i++) {
+		var distance = Vector.distance(this.position, objects[i].position);
+
+		if (lowest === 0 || distance < lowest) {
+			lowest = distance;
+			closest = objects[i];
+		}
+	}
+
+
+
+		if (lowest < closest.r + 40) {
+			// this.fill = 'green';
+
+			// start checking 25px ahead
+			var predict = this.velocity.clone();
+			predict.multiply(40);
+			var futureposition = Vector.add(this.position, predict);
+			var futuredistance = Vector.distance(futureposition, closest.position);
+
+	        // ctx.beginPath();
+	        // ctx.arc(futureposition.x, futureposition.y, 3, 0, 2 * Math.PI, false);
+	        // ctx.fillStyle = 'green';
+	        // ctx.fill();
+
+			if (futuredistance > closest.r) {
+				var toCenter = Vector.subtract(closest.position, this.position);
+				toCenter.normalize();
+				toCenter.multiply(this.velocity.mag());
+
+				var desired = Vector.add(this.velocity, toCenter.negative());
+				desired.normalize();
+				desired.multiply(this.maxspeed);
+			}
+
+			if (desired != null) {
+				steer = Vector.subtract(desired, this.velocity);
+				steer.limit(this.maxforce);
+				return steer.multiply(7);
+			} else {
+				return new Vector(0,0);
+			}
+
+		} else {
+			this.fill = 'red';
+			return new Vector(0,0);
+		}
+
+ }
+
 Boid.prototype.update = function() {
   // Update velocity
   this.velocity.add(this.acceleration);
@@ -194,8 +292,10 @@ function setup () {
 
 	// Do everything we need to on first load to get the game ready.
 
+
+
 	for (var i = 0; i < 200; i++) {
-		var newBoid = new Boid(rand(100,windowWidth,0.1),rand(100,windowHeight,0.1));
+		var newBoid = new Boid(100,150);
 		flock.addBoid(newBoid);
 	}
 
@@ -211,6 +311,11 @@ function step () {
 	for (var i = 0; i < flock.boids.length; i++) {
 		flock.boids[i].run(flock.boids)
 	}
+
+	death.run();
+	obstacle.run();
+	obstacle2.run();
+	obstacle3.run();
 
     requestAnimationFrame(function(timestamp) {
       step()
