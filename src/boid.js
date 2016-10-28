@@ -194,7 +194,7 @@ Boid.prototype.seperate = function(boids) {
 		if (desired != null) {
 			steer = Vector.subtract(desired, this.velocity);
 			steer.limit(this.maxforce);
-			return steer.multiply(7);
+			return steer.multiply(2 * (lowest /10) );
 		} else {
 			return new Vector(0,0);
 		}
