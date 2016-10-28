@@ -166,12 +166,12 @@ Boid.prototype.seperate = function(boids) {
 	}
 	// Check if we are attracting anything, we don't need to do anything if its an attracter
 	// because we want to smash into the planet anyway.
-	if (closest.attracting.indexOf(this.flock_id) == -1 && lowest < closest.r + 40) {
+	if (closest.attracting.indexOf(this.flock_id) == -1 && lowest < closest.r + closest.r * 1.2) {
 		// this.fill = 'green';
 
 		// start checking 40px ahead
 		var predict = this.velocity.clone();
-		predict.multiply(40);
+		predict.multiply(50);
 		var futureposition = Vector.add(this.position, predict);
 		var futuredistance = Vector.distance(futureposition, closest.position);
 
@@ -187,7 +187,8 @@ Boid.prototype.seperate = function(boids) {
 
 			var desired = Vector.add(this.velocity, toCenter.negative());
 			desired.normalize();
-			desired.multiply(this.maxspeed);
+			desired.multiply(lowest);
+			// desired.multiply(this.maxspeed);
 		}
 
 		if (desired != null) {
