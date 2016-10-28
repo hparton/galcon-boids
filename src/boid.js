@@ -4,7 +4,8 @@ import { rand, radians } from './js/utils';
 var windowWidth = window.innerWidth;
 var windowHeight = window.innerHeight;
 
-export const Boid = function(x,y) {
+export const Boid = function(ctx, x, y) {
+	this.ctx = ctx;
 	this.flock_id = {}
 	this.acceleration = new Vector(0,0);
 	this.velocity = new Vector(rand(-1,1,0.1), rand(-1,1,0.1));
@@ -14,27 +15,27 @@ export const Boid = function(x,y) {
 	this.maxforce = 0.05; // Max steering force
 }
 
-Boid.prototype.run = function(ctx, boids, objects) {
+Boid.prototype.run = function(boids, objects) {
 	this.flock(boids, objects);
 	this.update();
-	this.borders(ctx);
-	this.render(ctx);
+	this.borders();
+	this.render();
 }
 
-Boid.prototype.render = function(ctx) {
+Boid.prototype.render = function() {
   	var theta = this.velocity.toAngles() + radians(90);
 
-	ctx.strokeStyle = this.fill;
-	ctx.save();
-		ctx.translate(this.position.x + this.r/2,this.position.y + this.r/2);
-		ctx.rotate(theta);
-		ctx.beginPath();
-		ctx.moveTo(0, -this.r*2)
-		ctx.lineTo(-this.r,this.r*2);
-		ctx.lineTo(this.r,this.r*2);
-		ctx.closePath();
-		ctx.stroke();
-	ctx.restore();
+	this.ctx.strokeStyle = this.fill;
+	this.ctx.save();
+		this.ctx.translate(this.position.x + this.r/2,this.position.y + this.r/2);
+		this.ctx.rotate(theta);
+		this.ctx.beginPath();
+		this.ctx.moveTo(0, -this.r*2)
+		this.ctx.lineTo(-this.r,this.r*2);
+		this.ctx.lineTo(this.r,this.r*2);
+		this.ctx.closePath();
+		this.ctx.stroke();
+	this.ctx.restore();
 }
 
 Boid.prototype.applyForce = function(force) {
@@ -42,11 +43,11 @@ Boid.prototype.applyForce = function(force) {
   this.acceleration.add(force);
 }
 
-Boid.prototype.borders = function(ctx) {
-  if (this.position.x < -this.r)  this.position.x = ctx.canvas.width +this.r;
-  if (this.position.y < -this.r)  this.position.y = ctx.canvas.height+this.r;
-  if (this.position.x > ctx.canvas.width +this.r) this.position.x = -this.r;
-  if (this.position.y > ctx.canvas.height+this.r) this.position.y = -this.r;
+Boid.prototype.borders = function() {
+  if (this.position.x < -this.r)  this.position.x = this.ctx.canvas.width +this.r;
+  if (this.position.y < -this.r)  this.position.y = this.ctx.canvas.height+this.r;
+  if (this.position.x > this.ctx.canvas.width +this.r) this.position.x = -this.r;
+  if (this.position.y > this.ctx.canvas.height+this.r) this.position.y = -this.r;
 }
 
 Boid.prototype.flock = function(boids, objects) {
