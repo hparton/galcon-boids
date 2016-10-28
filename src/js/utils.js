@@ -19,10 +19,11 @@ export const guid = function() {
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
 }
 
-export const findById = function(source, id) {
-  for (var i = 0; i < source.length; i++) {
-    if (source[i].id === id) {
-      return source[i];
+export const findByKey = function(array, key, value) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i][key] === value) {
+            return array[i];
+        }
     }
-  }
+    return null;
 }

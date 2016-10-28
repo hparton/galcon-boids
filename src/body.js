@@ -1,5 +1,5 @@
 import {Vector} from './vector.js';
-import {findById} from './js/utils.js';
+import {findByKey} from './js/utils.js';
 
 export const Body = function(x, y, fill) {
 	this.r = 30;
@@ -48,7 +48,7 @@ Body.prototype.attract = function(flock, callback) {
 
 Body.prototype.attractedFlocks = function(flocks) {
 	for (var i = 0; i < this.attracting.length; i++) {
-		var attractedFlock = findById(flocks, this.attracting[i]);
+		var attractedFlock = findByKey(flocks, 'id', this.attracting[i]);
 
 		// Set this as self because javascript gets a bit forgetful in callbacks.
 		var self = this;
