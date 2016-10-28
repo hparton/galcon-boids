@@ -2,7 +2,7 @@ import {Vector} from './vector.js';
 import {Flock} from './flock.js';
 import {Boid} from './boid.js';
 import {Body} from './body.js';
-import {rand, map, guid} from './js/utils';
+import {rand, map} from './js/utils';
 
 var windowWidth = window.innerWidth;
 var windowHeight = window.innerHeight;
@@ -31,17 +31,25 @@ var bodies = [];
 // 		index = [i];
 // 	}
 // }
-
+var mouseDown = false;
 document.onmousedown = function(e) {
-	console.log(e);
-	var flock = new Flock();
-	for (var i = 0; i < rand(10, 30, 1); i++) {
-		var newBoid = new Boid(e.clientX,e.clientY);
-		flock.addBoid(newBoid);
+	mouseDown = true;
+}
+
+document.onmouseup = function() {
+	mouseDown = false;
+}
+
+document.onmousemove = function(e) {
+	if (mouseDown) {
+		var flock = new Flock(ctx);
+		for (var i = 0; i < rand(10, 30, 1); i++) {
+			var newBoid = new Boid(ctx, e.clientX,e.clientY);
+			flock.addBoid(newBoid);
+		}
+		flocks.push(flock);
+		bodies[rand(0,bodies.length -1,1)].attracting.push(flock.id);
 	}
-	flocks.push(flock);
-	bodies[rand(0,bodies.length -1,1)].attracting.push(flock.id);
-	console.log(flocks);
 }
 
 
