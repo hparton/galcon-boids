@@ -56,7 +56,7 @@ Boid.prototype.flock = function(boids, objects) {
 	var avo = this.avoid(objects);
 
 	sep.multiply(3);
-	coh.multiply(1);
+	coh.multiply(1.5);
 	ali.multiply(1);
 	// avo.multiply(5);
 
