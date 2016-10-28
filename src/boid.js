@@ -163,9 +163,9 @@ Boid.prototype.seperate = function(boids) {
 			closest = objects[i];
 		}
 	}
-	// Check if we are a repeller or attracter, we don't need to do anything if its an attracter
+	// Check if we are attracting anything, we don't need to do anything if its an attracter
 	// because we want to smash into the planet anyway.
-	if (closest.repeller && lowest < closest.r + 40) {
+	if (closest.attracting.indexOf(this.flock_id) == -1 && lowest < closest.r + 40) {
 		// this.fill = 'green';
 
 		// start checking 40px ahead

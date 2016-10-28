@@ -17,7 +17,7 @@ var bodies = [];
 
 function Flock() {
 	this.id = guid();
-	this.color = randomColor();
+	this.color = randomColor({luminosity: 'dark'});
 	this.boids = [];
 }
 
@@ -43,44 +43,32 @@ Flock.prototype.removeBoid = function(index) {
 	this.boids.splice(index, 1);
 }
 
+// USEFUL FOR SELECTING TARGET LATER.
+// var mousePosition = new Vector(e.clientX, e.clientY);
+// 	var lowest = 0;
+// 	var index = 0;
+// 	var closest = {};
+
+// for (var i = 0; i < bodies.length; i++) {
+// 	var distance = Vector.distance(mousePosition, bodies[i].position);
+
+// 	if (lowest === 0 || distance < lowest) {
+// 		lowest = distance;
+// 		closest = bodies[i];
+// 		index = [i];
+// 	}
+// }
 
 document.onmousedown = function(e) {
 	console.log(e);
-	var mousePosition = new Vector(e.clientX, e.clientY);
- 	var lowest = 0;
- 	var index = 0;
- 	var closest = {};
-
-	for (var i = 0; i < bodies.length; i++) {
-		var distance = Vector.distance(mousePosition, bodies[i].position);
-
-		if (lowest === 0 || distance < lowest) {
-			lowest = distance;
-			closest = bodies[i];
-			index = [i];
-		}
+	var flock = new Flock();
+	for (var i = 0; i < rand(10, 30, 1); i++) {
+		var newBoid = new Boid(e.clientX,e.clientY);
+		flock.addBoid(newBoid);
 	}
-
-	if (lowest < closest.r) {
-		if (!closest.attracter) {
-			closest.fill = 'red';
-			closest.attracter = true;
-			closest.repeller = false;
-		} else {
-			closest.fill = 'blue';
-			closest.attracter = false;
-			closest.repeller = true;
-		}
-
-	} else {
-		var flock = new Flock();
-		for (var i = 0; i < 20; i++) {
-			var newBoid = new Boid(e.clientX,e.clientY);
-			flock.addBoid(newBoid);
-		}
-		flocks.push(flock);
-		console.log(flocks);
-	}
+	flocks.push(flock);
+	bodies[rand(0,bodies.length -1,1)].attracting.push(flock.id);
+	console.log(flocks);
 }
 
 
@@ -101,17 +89,7 @@ function step () {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	for (var i = 0; i < bodies.length; i++) {
-		bodies[i].run(ctx);
-	}
-
-	for (var i = 0; i < bodies.length; i++) {
-		if (bodies[i].attracter) {
-			for (var f = 0; f < flocks.length; f++) {
-				bodies[i].attract(flocks[f], function(e) {
-					flocks[f].removeBoid(e);
-				})
-			}
-		}
+		bodies[i].run(ctx, flocks);
 	}
 
 	for (var i = 0; i < flocks.length; i++) {
@@ -122,10 +100,6 @@ function step () {
     requestAnimationFrame(function(timestamp) {
       step()
     })
-}
-
-function draw () {
-
 }
 
 function getByValue(arr, value) {

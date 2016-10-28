@@ -1,20 +1,29 @@
 import {Vector} from './vector.js';
+import {findById} from './js/utils.js';
 
 export const Body = function(x, y, fill) {
 	this.r = 30;
 	this.position = new Vector(x,y);
 	this.fill = 'blue';
-	this.attracter = false;
-	this.repeller = true;
+	this.attracting = [];
 }
 
-Body.prototype.run = function(ctx) {
+Body.prototype.run = function(ctx, flocks) {
 	this.render(ctx);
+
+	if (this.attracting.length) {
+		this.attractedFlocks(flocks);
+	}
 }
 
 Body.prototype.render = function(ctx) {
 	ctx.save();
-		ctx.fillStyle = this.fill;
+		if (this.attracting.length) {
+			ctx.fillStyle = 'red';
+		} else {
+			ctx.fillStyle = this.fill;
+		}
+
 		ctx.beginPath();
 		ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
 		ctx.fill();
@@ -34,5 +43,21 @@ Body.prototype.attract = function(flock, callback) {
 				callback(i);
 			}
 		}
+	}
+}
+
+Body.prototype.attractedFlocks = function(flocks) {
+	for (var i = 0; i < this.attracting.length; i++) {
+		var attractedFlock = findById(flocks, this.attracting[i]);
+
+		// Set this as self because javascript gets a bit forgetful in callbacks.
+		var self = this;
+		this.attract(attractedFlock, function(e) {
+			attractedFlock.removeBoid(e);
+
+			if (!attractedFlock.boids.length) {
+				self.attracting.splice(self.attracting.indexOf(attractedFlock.id), 1);
+			}
+		})
 	}
 }
