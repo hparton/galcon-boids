@@ -1,33 +1,40 @@
 import {Vector} from './vector.js';
 import {findByKey} from './js/utils.js';
 
-export const Body = function(x, y, fill) {
+var debug = false;
+
+export const Body = function(ctx, x, y, fill) {
+	this.ctx = ctx;
 	this.r = 30;
 	this.position = new Vector(x,y);
-	this.fill = 'blue';
+	this.fill = fill;
 	this.attracting = [];
 }
 
-Body.prototype.run = function(ctx, flocks) {
-	this.render(ctx);
+Body.prototype.run = function(flocks) {
+	this.render();
 
 	if (this.attracting.length) {
 		this.attractedFlocks(flocks);
 	}
 }
 
-Body.prototype.render = function(ctx) {
-	ctx.save();
-		if (this.attracting.length) {
-			ctx.fillStyle = 'red';
-		} else {
-			ctx.fillStyle = this.fill;
+Body.prototype.render = function() {
+	this.ctx.save();
+		this.ctx.fillStyle = this.fill;
+
+		if (this.debug) {
+			if (this.attracting.length) {
+				this.ctx.fillStyle = 'red';
+			} else {
+				this.ctx.fillStyle = this.fill;
+			}
 		}
 
-		ctx.beginPath();
-		ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
-		ctx.fill();
-	ctx.restore();
+		this.ctx.beginPath();
+		this.ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
+		this.ctx.fill();
+	this.ctx.restore();
 }
 
 Body.prototype.attract = function(flock, callback) {
@@ -50,6 +57,13 @@ Body.prototype.attractedFlocks = function(flocks) {
 	for (var i = 0; i < this.attracting.length; i++) {
 		var attractedFlock = findByKey(flocks, 'id', this.attracting[i]);
 
+		if (debug) {
+			this.ctx.beginPath();
+			this.ctx.strokeStyle = 'black';
+			this.ctx.moveTo(attractedFlock.boids[0].position.x,attractedFlock.boids[0].position.y);
+			this.ctx.lineTo(this.position.x, this.position.y);
+			this.ctx.stroke();
+		}
 		// Set this as self because javascript gets a bit forgetful in callbacks.
 		var self = this;
 		this.attract(attractedFlock, function(e) {

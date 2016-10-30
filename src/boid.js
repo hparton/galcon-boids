@@ -181,11 +181,12 @@ Boid.prototype.seperate = function(boids) {
         // ctx.fill();
 
 		if (futuredistance > closest.r) {
-			var toCenter = Vector.subtract(closest.position, this.position);
-			toCenter.normalize();
-			toCenter.multiply(this.velocity.mag());
+			var diff = Vector.subtract(closest.position, this.position);
+			diff.normalize();
+			diff.multiply(this.velocity.mag());
+			diff.negative();
 
-			var desired = Vector.add(this.velocity, toCenter.negative());
+			var desired = Vector.add(this.velocity, diff);
 			desired.normalize();
 			desired.multiply(lowest);
 			// desired.multiply(this.maxspeed);
@@ -194,7 +195,7 @@ Boid.prototype.seperate = function(boids) {
 		if (desired != null) {
 			steer = Vector.subtract(desired, this.velocity);
 			steer.limit(this.maxforce);
-			return steer.multiply(2 * (lowest /10) );
+			return steer.multiply(1.3 * (lowest /7.5) );
 		} else {
 			return new Vector(0,0);
 		}

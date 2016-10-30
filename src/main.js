@@ -1,20 +1,7 @@
-import {Vector} from './vector.js';
-import {Flock} from './flock.js';
-import {Boid} from './boid.js';
-import {Body} from './body.js';
-import {rand, map} from './js/utils';
+import {World} from './game.js';
+import {rand} from './js/utils';
 
-var windowWidth = window.innerWidth;
-var windowHeight = window.innerHeight;
-
-var canvas = document.getElementById('galcon');
-var ctx = canvas.getContext('2d');
-
-ctx.canvas.width = windowWidth;
-ctx.canvas.height = windowHeight;
-
-var flocks = [];
-var bodies = [];
+var world = new World(document.getElementById('galcon'), window.innerWidth, window.innerHeight);
 
 // USEFUL FOR SELECTING TARGET LATER.
 // var mousePosition = new Vector(e.clientX, e.clientY);
@@ -42,53 +29,6 @@ document.onmouseup = function() {
 
 document.onmousemove = function(e) {
 	if (mouseDown) {
-		var flock = new Flock(ctx);
-		for (var i = 0; i < rand(10, 30, 1); i++) {
-			var newBoid = new Boid(ctx, e.clientX,e.clientY);
-			flock.addBoid(newBoid);
-		}
-		flocks.push(flock);
-		bodies[rand(0,bodies.length -1,1)].attracting.push(flock.id);
+		world.planets[rand(0, world.planets.length -1, 1)].spawnFighters(world, world.planets[rand(0, world.planets.length -1, 1)].id)
 	}
 }
-
-
-function setup () {
-
-	// Do everything we need to on first load to get the game ready.
-	for (var i = 0; i < 10; i++) {
-		var newBody = new Body(rand(0,windowWidth,30), rand(0,windowHeight,30))
-		bodies.push(newBody);
-	}
-
-    requestAnimationFrame(function(timestamp) {
-      step()
-    })
-}
-
-function step () {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-	for (var i = 0; i < bodies.length; i++) {
-		bodies[i].run(ctx, flocks);
-	}
-
-	for (var i = 0; i < flocks.length; i++) {
-		flocks[i].run(bodies);
-		flocks[i].delete(flocks, i);
-	}
-
-    requestAnimationFrame(function(timestamp) {
-      step()
-    })
-}
-
-function getByValue(arr, value) {
-
-  for (var i=0, iLen=arr.length; i<iLen; i++) {
-
-    if (arr[i].b == value) return arr[i];
-  }
-}
-
-setup()

@@ -1,9 +1,9 @@
 import {guid} from './js/utils';
 
-export const Flock = function (ctx) {
+export const Flock = function (ctx, color) {
 	this.id = guid();
 	this.ctx = ctx;
-	this.color = randomColor({luminosity: 'dark'});
+	this.color = color;
 	this.boids = [];
 }
 
