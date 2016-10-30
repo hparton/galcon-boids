@@ -6,7 +6,6 @@ var windowHeight = window.innerHeight;
 
 export const Boid = function(ctx, x, y) {
 	this.ctx = ctx;
-	this.flock_id = {}
 	this.acceleration = new Vector(0,0);
 	this.velocity = new Vector(rand(-1,1,0.1), rand(-1,1,0.1));
 	this.position = new Vector(x,y);

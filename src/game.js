@@ -63,29 +63,25 @@ export const Planet = function(x, y, r, faction) {
 		this.faction = false;
 	}
 
-	switch (faction) {
-		case 1:
-			this.fill = 'rgb(216, 57, 57)';
-			break;
-		case 2:
-			this.fill = 'rgb(39, 133, 219)';
-			break;
-		default:
-			this.fill = 'orange';
-	}
+	this.updateFactionColor();
 
 	this.body = new Body(x, y, r, this.fill);
+
 	this.fighters = 0;
 }
 
 Planet.prototype.run = function(flocks) {
-	this.produceFighters();
-	this.body.run(flocks);
+	this.incrementFighterCount();
+	var self = this;
+	this.body.run(flocks, function(i, flock) {
+		self.calculateFighterHit(i, flock);
+	});
 	this.render();
 }
 
 Planet.prototype.render = function() {
 	this.drawPlanetCount();
+	this.updateFactionColor();
 }
 
 Planet.prototype.drawPlanetCount = function() {
@@ -99,30 +95,86 @@ Planet.prototype.drawPlanetCount = function() {
 	this.body.ctx.restore();
 }
 
-Planet.prototype.produceFighters = function() {
-	var inc = 0.01 * (this.body.r / 2);
+Planet.prototype.updateFactionColor = function() {
+	switch (this.faction) {
+		case 1:
+			this.fill = 'rgb(216, 57, 57)';
+			if (this.body) {
+				this.body.fill = this.fill;
+			}
+			break;
+		case 2:
+			this.fill = 'rgb(39, 133, 219)';
+			if (this.body) {
+				this.body.fill = this.fill;
+			}
+			break;
+		default:
+			this.fill = 'orange';
+			if (this.body) {
+				this.body.fill = this.fill;
+			}
+	}
+
+}
+
+Planet.prototype.incrementFighterCount = function(inc) {
+	if (!inc) {
+		var inc = 0.001 * (this.body.r / 2);
+	}
 
 	if (this.faction) {
 		this.fighters += inc;
 	}
 }
 
-Planet.prototype.reduceFighters = function() {
-	this.fighters = this.fighters / 2;
+Planet.prototype.decrementFighterCount = function(inc) {
+	this.fighters -= inc;
 }
 
 Planet.prototype.spawnFighters = function(world, id) {
-	var fighterCount = this.fighters / 2;
-	var flock = new Flock(this.body.ctx, this.fill);
-	var target = findByKey(world.planets, 'id', id);
-	for (var i = 0; i < fighterCount; i++) {
-		var newBoid = new Boid(this.body.ctx, this.body.position.x, this.body.position.y);
-		flock.addBoid(newBoid);
+	if (this.fighters >= 2) {
+		var fighterCount = this.fighters / 2;
+		var target = findByKey(world.planets, 'id', id);
+
+		var flock = new Flock(this.body.ctx, this.fill, this.faction);
+
+		for (var i = 0; i < fighterCount; i++) {
+			var newBoid = new Boid(this.body.ctx, this.body.position.x, this.body.position.y);
+			flock.addBoid(newBoid);
+		}
+
+		world.flocks.push(flock);
+		target.body.attracting.push(flock.id);
+
+		this.decrementFighterCount(fighterCount);
 	}
+}
 
-	world.flocks.push(flock);
-	target.body.attracting.push(flock.id);
+Planet.prototype.calculateFighterHit = function(i, flock) {
 
-	this.reduceFighters();
+		// If its friendly we can just add it to the fighter count.
+		if (flock.boids[i].faction == this.faction) {
+			this.incrementFighterCount(1);
+		}
+
+		// If not take a hit.
+		if (flock.boids[i].faction !== this.faction) {
+			this.decrementFighterCount(1);
+		}
+
+		// If it puts us under 1, switch faction and reset the fighter count.
+		if (this.fighters <= 0.9) {
+			this.faction = flock.boids[i].faction;
+			this.incrementFighterCount(1);
+		}
+
+		// It crashed so remove it.
+		flock.removeBoid(i);
+
+		// If the flock has no boids left, remove the flock from attracted list.
+		if (!flock.boids.length) {
+			this.body.attracting.splice(this.body.attracting.indexOf(flock.id), 1);
+		}
 }
 

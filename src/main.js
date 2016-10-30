@@ -29,6 +29,7 @@ document.onmouseup = function() {
 
 document.onmousemove = function(e) {
 	if (mouseDown) {
+		console.log(world);
 		world.planets[rand(0, world.planets.length -1, 1)].spawnFighters(world, world.planets[rand(0, world.planets.length -1, 1)].id)
 	}
 }

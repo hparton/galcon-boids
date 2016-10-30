@@ -11,11 +11,11 @@ export const Body = function(ctx, x, y, fill) {
 	this.attracting = [];
 }
 
-Body.prototype.run = function(flocks) {
+Body.prototype.run = function(flocks, callback) {
 	this.render();
 
 	if (this.attracting.length) {
-		this.attractedFlocks(flocks);
+		this.attractedFlocks(flocks, callback);
 	}
 }
 
@@ -39,24 +39,24 @@ Body.prototype.render = function() {
 
 Body.prototype.attract = function(flock, callback) {
 	var zone = this.r;
-
-	for (var i = 0; i < flock.boids.length; i++) {
-		flock.boids[i].applyForce(flock.boids[i].seek(this.position).multiply(2))
-		if (callback) {
-			// No point checking distance if we don't have a callback.
-			var distance = Vector.distance(this.position, flock.boids[i].position);
-			// If its in the 'zone', e.g planet radius
-			if ((distance > 0) && (distance < zone)) {
-				callback(i);
+	if (flock) {
+		for (var i = 0; i < flock.boids.length; i++) {
+			flock.boids[i].applyForce(flock.boids[i].seek(this.position).multiply(2))
+			if (callback) {
+				// No point checking distance if we don't have a callback.
+				var distance = Vector.distance(this.position, flock.boids[i].position);
+				// If its in the 'zone', e.g planet radius
+				if ((distance > 0) && (distance < zone)) {
+					callback(i, flock);
+				}
 			}
 		}
 	}
 }
 
-Body.prototype.attractedFlocks = function(flocks) {
+Body.prototype.attractedFlocks = function(flocks, callback) {
 	for (var i = 0; i < this.attracting.length; i++) {
 		var attractedFlock = findByKey(flocks, 'id', this.attracting[i]);
-
 		if (debug) {
 			this.ctx.beginPath();
 			this.ctx.strokeStyle = 'black';
@@ -66,12 +66,8 @@ Body.prototype.attractedFlocks = function(flocks) {
 		}
 		// Set this as self because javascript gets a bit forgetful in callbacks.
 		var self = this;
-		this.attract(attractedFlock, function(e) {
-			attractedFlock.removeBoid(e);
-
-			if (!attractedFlock.boids.length) {
-				self.attracting.splice(self.attracting.indexOf(attractedFlock.id), 1);
-			}
-		})
+		this.attract(attractedFlock, function(e, flock) {
+			callback(e, flock);
+		});
 	}
 }
