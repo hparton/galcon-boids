@@ -19,7 +19,19 @@ World.prototype.setup = function(width, height) {
 
 	// Do everything we need to on first load to get the game ready.
 	for (var i = 0; i < 10; i++) {
-		var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), rand(1,2,1), 1);
+		var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), rand(20, 40), null);
+
+		if (i == 1) {
+			var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), 60, 1, 100);
+		}
+
+		if (i == 2) {
+			var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), 60, 2, 100);
+		}
+
+		// if (i == 3) {
+		// 	var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), 60, 3, 100);
+		// }
 		this.planets.push(newPlanet);
 		this.bodies.push(newPlanet.body);
 	}
@@ -54,7 +66,7 @@ World.prototype.run = function () {
 }
 
 
-export const Planet = function(x, y, r, faction) {
+export const Planet = function(ctx, x, y, r, faction, fighters) {
 	this.id = guid();
 
 	if (faction) {
@@ -65,9 +77,13 @@ export const Planet = function(x, y, r, faction) {
 
 	this.updateFactionColor();
 
-	this.body = new Body(x, y, r, this.fill);
+	this.body = new Body(ctx, x, y, r, this.fill);
 
-	this.fighters = 0;
+	if (fighters) {
+		this.fighters = fighters;
+	} else {
+		this.fighters = rand(1,30,1);
+	}
 }
 
 Planet.prototype.run = function(flocks) {
@@ -109,8 +125,14 @@ Planet.prototype.updateFactionColor = function() {
 				this.body.fill = this.fill;
 			}
 			break;
+		case 3:
+			this.fill ='rgb(136, 70, 221)';
+			if(this.body) {
+				this.body.fill = this.fill;
+			}
+			break;
 		default:
-			this.fill = 'orange';
+			this.fill = 'grey';
 			if (this.body) {
 				this.body.fill = this.fill;
 			}
@@ -119,12 +141,14 @@ Planet.prototype.updateFactionColor = function() {
 }
 
 Planet.prototype.incrementFighterCount = function(inc) {
-	if (!inc) {
-		var inc = 0.001 * (this.body.r / 2);
-	}
-
 	if (this.faction) {
-		this.fighters += inc;
+		if (!inc) {
+			var inc = 0.001 * (this.body.r / 2);
+		}
+
+		if (this.faction) {
+			this.fighters += inc;
+		}
 	}
 }
 
@@ -133,7 +157,7 @@ Planet.prototype.decrementFighterCount = function(inc) {
 }
 
 Planet.prototype.spawnFighters = function(world, id) {
-	if (this.fighters >= 2) {
+	if (this.faction && this.fighters >= 2) {
 		var fighterCount = this.fighters / 2;
 		var target = findByKey(world.planets, 'id', id);
 

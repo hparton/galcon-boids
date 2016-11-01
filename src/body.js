@@ -3,9 +3,9 @@ import {findByKey} from './js/utils.js';
 
 var debug = false;
 
-export const Body = function(ctx, x, y, fill) {
+export const Body = function(ctx, x, y, r, fill) {
 	this.ctx = ctx;
-	this.r = 30;
+	this.r = r;
 	this.position = new Vector(x,y);
 	this.fill = fill;
 	this.attracting = [];
