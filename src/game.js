@@ -106,8 +106,12 @@ World.prototype.issueOrder = function(planet, target) {
 	planet.spawnFighters(this, target.id);
 }
 
+World.prototype.getMousePosition = function(x,y) {
+	return new Vector(x, y);
+}
+
 World.prototype.findClosestPlanet = function(x,y) {
-	var mousePosition = new Vector(x, y);
+	var mousePosition = this.getMousePosition(x, y);
 	var lowest = 0;
 	var index = 0;
 	var closest = null;
