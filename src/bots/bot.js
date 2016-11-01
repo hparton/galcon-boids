@@ -5,12 +5,8 @@ export const Bot = function(world, faction) {
 	this.world = world;
 }
 
-Bot.prototype.doTurn = function(callback) {
-	if (callback) {
-		callback();
-	} else {
-		throw "No function provided to doTurn, crashing.";
-	}
+Bot.prototype.doTurn = function() {
+	throw "No function overwriting doTurn, stopping here. Make sure you set a botType.prototype.doTurn on the new bot type";
 }
 
 // Return an array of all my fleets in flight.
@@ -53,4 +49,13 @@ Bot.prototype.notMyPlanets = function() {
 	}
 
 	return notMyPlanets;
+}
+
+Bot.prototype.run = function() {
+	this.doTurn();
+
+	var self = this;
+	requestAnimationFrame(function(timestamp) {
+	 	self.run();
+	})
 }
