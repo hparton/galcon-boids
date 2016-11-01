@@ -1,6 +1,7 @@
 import {Body} from './body';
 import {Boid} from './boid';
 import {Flock} from './flock';
+import {Vector} from './vector';
 import {guid, findByKey, rand} from './js/utils';
 
 export const World = function(canvas, width, height) {
@@ -19,24 +20,43 @@ World.prototype.setup = function(width, height) {
 
 	// Do everything we need to on first load to get the game ready.
 	for (var i = 0; i < 10; i++) {
-		var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), rand(20, 40), null);
+
+		var newCords = this.generateRandomPosition(width, height, true);
 
 		if (i == 1) {
-			var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), 60, 1, 100);
+			console.log(newCords)
+			this.addPlanet(newCords.x, newCords.y, 60, 1, 100);
+		} else if (i == 2) {
+			this.addPlanet(newCords.x, newCords.y, 60, 2, 100);
+		} else {
+			this.addPlanet(newCords.x, newCords.y, rand(20, 40), null);
 		}
 
-		if (i == 2) {
-			var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), 60, 2, 100);
-		}
+
 
 		// if (i == 3) {
 		// 	var newPlanet = new Planet(this.ctx, rand(0,width,30), rand(0,height,30), 60, 3, 100);
 		// }
-		this.planets.push(newPlanet);
-		this.bodies.push(newPlanet.body);
+	}
+}
+
+World.prototype.generateRandomPosition = function(width, height, unique) {
+	var cords = {};
+	cords.x = rand(70, (width - 70), 1);
+	cords.y = rand(70, (height - 70), 1);
+
+	if (unique && this.planets.length) {
+		for (var i = 0; i < this.planets.length; i++) {
+			if (
+				this.planets[i].body.position.x < cords.x + this.planets[i].body.r && this.planets[i].body.position.x > cords.x - this.planets[i].body.r  ||
+				this.planets[i].body.position.y < cords.y + this.planets[i].body.r && this.planets[i].body.position.y > cords.y - this.planets[i].body.r
+			) {
+				cords = this.generateRandomPosition(width, height, true);
+			}
+		}
 	}
 
-    this.step()
+	return cords;
 }
 
 World.prototype.step = function() {
@@ -57,17 +77,64 @@ World.prototype.step = function() {
     })
 }
 
-World.prototype.addPlanet = function() {
-
+World.prototype.run = function(callback) {
+	if (callback) {
+	    callback();
+	}
+    this.step()
 }
 
-World.prototype.run = function () {
+World.prototype.addPlanet = function(x, y, radius, faction, fighters) {
+	var newPlanet = new Planet(this.ctx, x, y, radius, faction, fighters);
+	this.planets.push(newPlanet);
+	this.bodies.push(newPlanet.body);
+}
 
+World.prototype.selectPlanets = function(planets) {
+	for (var i = 0; i < planets.length; i++) {
+		planets[i].selected = true;
+	}
+}
+
+World.prototype.deselectPlanets = function(planets) {
+	for (var i = 0; i < planets.length; i++) {
+		planets[i].selected = false;
+	}
+}
+
+World.prototype.issueOrder = function(planet, target) {
+	planet.spawnFighters(this, target.id);
+}
+
+World.prototype.findClosestPlanet = function(x,y) {
+	var mousePosition = new Vector(x, y);
+	var lowest = 0;
+	var index = 0;
+	var closest = null;
+
+	for (var i = 0; i < this.planets.length; i++) {
+		var distance = Vector.distance(mousePosition, this.planets[i].body.position);
+
+		if (lowest === 0 || distance < lowest) {
+			lowest = distance;
+			closest = this.planets[i];
+			index = [i];
+		}
+	}
+
+	var distance = Vector.distance(mousePosition, closest.body.position);
+
+	if ((distance > 0) && (distance < closest.body.r)) {
+		return closest;
+	} else {
+		return null;
+	}
 }
 
 
 export const Planet = function(ctx, x, y, r, faction, fighters) {
 	this.id = guid();
+	this.selected = false;
 
 	if (faction) {
 		this.faction = faction;
@@ -76,7 +143,6 @@ export const Planet = function(ctx, x, y, r, faction, fighters) {
 	}
 
 	this.updateFactionColor();
-
 	this.body = new Body(ctx, x, y, r, this.fill);
 
 	if (fighters) {
@@ -98,16 +164,29 @@ Planet.prototype.run = function(flocks) {
 Planet.prototype.render = function() {
 	this.drawPlanetCount();
 	this.updateFactionColor();
+
+	if (this.selected) {
+		this.drawSelectedIndicator();
+	}
+}
+
+Planet.prototype.drawSelectedIndicator = function() {
+	this.body.ctx.save();
+	  this.body.ctx.beginPath();
+      this.body.ctx.arc(this.body.position.x, this.body.position.y, this.body.r, 0, 2 * Math.PI, false);
+      this.body.ctx.lineWidth = 5;
+      this.body.ctx.strokeStyle = '#003300';
+      this.body.ctx.stroke();
+    this.body.ctx.restore();
 }
 
 Planet.prototype.drawPlanetCount = function() {
 	this.body.ctx.save();
-	this.body.ctx.fillStyle = "#FFFFFF";
-	this.body.ctx.font = "24px sans-serif";
-	this.body.ctx.textAlign = 'center';
-	this.body.ctx.textBaseline = 'middle';
-
-	this.body.ctx.fillText(Math.floor(this.fighters), this.body.position.x, this.body.position.y);
+	  this.body.ctx.fillStyle = "#FFFFFF";
+	  this.body.ctx.font = "24px sans-serif";
+	  this.body.ctx.textAlign = 'center';
+	  this.body.ctx.textBaseline = 'middle';
+	  this.body.ctx.fillText(Math.floor(this.fighters), this.body.position.x, this.body.position.y);
 	this.body.ctx.restore();
 }
 
