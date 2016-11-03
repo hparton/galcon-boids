@@ -85,15 +85,10 @@ document.onmousemove = function(e) {
 
 				// Check if the planet fits in the area we are dragging.
 				// This is a monstrosity but not sure of a better way right now.
-				if (planet.position.x >= dragStart.x
-					&& planet.position.y >= dragStart.y
-					&& planet.position.x <= dragEnd.x
-					&& planet.position.y <= dragEnd.y ||
-					planet.position.x <= dragStart.x
-					&& planet.position.y <= dragStart.y
-					&& planet.position.x >= dragEnd.x
-					&& planet.position.y >= dragEnd.y
-					) {
+				if (Math.abs(planet.position.x) >= dragStart.x
+					&& Math.abs(planet.position.y) >= dragStart.y
+					&& Math.abs(planet.position.x) <= dragEnd.x
+					&& Math.abs(planet.position.y) <= dragEnd.y) {
 
 					// Check if the planet is already selected, if so we don't need to add it again
 					// or we will end up sending multiple commands to send ships.

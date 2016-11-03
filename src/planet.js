@@ -54,20 +54,40 @@ Planet.prototype.render = function() {
 Planet.prototype.renderSelectedIndicator = function() {
 	this.ctx.save();
 	  this.ctx.beginPath();
-      this.ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
-      this.ctx.lineWidth = 5;
-      this.ctx.strokeStyle = '#003300';
+      this.ctx.arc(this.position.x, this.position.y, this.r + 5, 0, 2 * Math.PI, false);
+      this.ctx.lineWidth = 3;
+      this.ctx.strokeStyle = '#FFFFFF';
       this.ctx.stroke();
     this.ctx.restore();
 }
 
 Planet.prototype.renderPlanetCount = function() {
 	this.ctx.save();
-	  this.ctx.fillStyle = "#FFFFFF";
-	  this.ctx.font = "24px sans-serif";
+	  this.ctx.fillStyle = this.fill;
+	  this.ctx.font = "24px monospace";
 	  this.ctx.textAlign = 'center';
 	  this.ctx.textBaseline = 'middle';
 	  this.ctx.fillText(Math.floor(this.fighters), this.position.x, this.position.y);
+	this.ctx.restore();
+}
+
+Planet.prototype.renderPlanet = function() {
+	this.ctx.save();
+		this.ctx.strokeStyle = this.fill;
+		this.ctx.fillStyle = 'rgb(35, 35, 35)';
+		this.ctx.strokeWidth = 2;
+		if (this.debug) {
+			if (this.attracting.length) {
+				this.ctx.fillStyle = 'red';
+			} else {
+				this.ctx.fillStyle = this.fill;
+			}
+		}
+
+		this.ctx.beginPath();
+		this.ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
+		this.ctx.fill();
+		this.ctx.stroke();
 	this.ctx.restore();
 }
 
@@ -163,25 +183,6 @@ Planet.prototype.calculateFighterHit = function(i, fleet) {
 
 
 var debug = false;
-
-
-Planet.prototype.renderPlanet = function() {
-	this.ctx.save();
-		this.ctx.fillStyle = this.fill;
-
-		if (this.debug) {
-			if (this.attracting.length) {
-				this.ctx.fillStyle = 'red';
-			} else {
-				this.ctx.fillStyle = this.fill;
-			}
-		}
-
-		this.ctx.beginPath();
-		this.ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
-		this.ctx.fill();
-	this.ctx.restore();
-}
 
 Planet.prototype.attract = function(fleet, callback) {
 	var zone = this.r;
