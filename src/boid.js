@@ -165,7 +165,7 @@ Boid.prototype.seperate = function(boids) {
 	}
 	// Check if we are attracting anything, we don't need to do anything if its an attracter
 	// because we want to smash into the planet anyway.
-	if (closest.attracting.indexOf(this.flock_id) == -1 && lowest < closest.r + closest.r * 1.2) {
+	if (closest.attracting.indexOf(this.fleet_id) == -1 && lowest < closest.r + closest.r * 1.2) {
 		// this.fill = 'green';
 
 		// start checking 40px ahead

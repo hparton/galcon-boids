@@ -1,6 +1,6 @@
 import {guid} from './js/utils';
 
-export const Flock = function (ctx, color, faction) {
+export const Fleet = function (ctx, color, faction) {
 	this.id = guid();
 	this.faction = faction;
 	this.ctx = ctx;
@@ -8,25 +8,25 @@ export const Flock = function (ctx, color, faction) {
 	this.boids = [];
 }
 
-Flock.prototype.run = function(bodies) {
+Fleet.prototype.run = function(bodies) {
 	for (var i = 0; i < this.boids.length; i++) {
 		this.boids[i].run(this.boids, bodies);
 	}
 }
 
-Flock.prototype.delete = function(flocks, index) {
+Fleet.prototype.delete = function(fleets, index) {
 	if (this.boids.length <= 0) {
-		flocks.splice(index, 1);
+		fleets.splice(index, 1);
 	}
 }
 
-Flock.prototype.addBoid = function(boid) {
-	boid.flock_id = this.id;
+Fleet.prototype.addBoid = function(boid) {
+	boid.fleet_id = this.id;
 	boid.fill = this.color;
 	boid.faction = this.faction;
 	this.boids.push(boid);
 }
 
-Flock.prototype.removeBoid = function(index) {
+Fleet.prototype.removeBoid = function(index) {
 	this.boids.splice(index, 1);
 }

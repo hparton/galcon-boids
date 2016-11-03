@@ -3,15 +3,17 @@ import {bullyBot} from './bots/bullyBot';
 
 var world = new World(document.getElementById('galcon'), window.innerWidth, window.innerHeight);
 
+// Game variables
 var playerFaction = 1;
+
+// Controls variables
 var selectedPlanets = [];
-
 var mouseDown = false;
-
 var dragStart = null;
 var dragEnd = null;
 
 document.onmousedown = function(e) {
+	console.log(world);
 	mouseDown = true;
 	// Find the closest planet, returns null if the mouse is not inside
 	// the radius of the planet.
@@ -83,46 +85,46 @@ document.onmousemove = function(e) {
 
 				// Check if the planet fits in the area we are dragging.
 				// This is a monstrosity but not sure of a better way right now.
-				if (planet.body.position.x >= dragStart.x
-		            && planet.body.position.y >= dragStart.y
-		            && planet.body.position.x <= dragEnd.x
-		            && planet.body.position.y <= dragEnd.y ||
-					planet.body.position.x <= dragStart.x
-		            && planet.body.position.y <= dragStart.y
-		            && planet.body.position.x >= dragEnd.x
-		            && planet.body.position.y >= dragEnd.y
-		            ) {
+				if (planet.position.x >= dragStart.x
+					&& planet.position.y >= dragStart.y
+					&& planet.position.x <= dragEnd.x
+					&& planet.position.y <= dragEnd.y ||
+					planet.position.x <= dragStart.x
+					&& planet.position.y <= dragStart.y
+					&& planet.position.x >= dragEnd.x
+					&& planet.position.y >= dragEnd.y
+					) {
 
 					// Check if the planet is already selected, if so we don't need to add it again
 					// or we will end up sending multiple commands to send ships.
-		        	var duplicate = false;
+					var duplicate = false;
 
-		            for (var c = 0; c < selectedPlanets.length; c++) {
-		        		if (selectedPlanets[c].id == planet.id) {
-		        			duplicate = true;
-		        		}
- 		        	}
+					for (var c = 0; c < selectedPlanets.length; c++) {
+						if (selectedPlanets[c].id == planet.id) {
+							duplicate = true;
+						}
+					}
 
  		        	// Not a duplicate so add it.
  		        	if (!duplicate) {
-			            selectedPlanets.push(planet);
-			            world.selectPlanets(selectedPlanets);
-		        	}
-		        } else {
+ 		        		selectedPlanets.push(planet);
+ 		        		world.selectPlanets(selectedPlanets);
+ 		        	}
+ 		        } else {
 		        	// Check if we have some selected before trying to remove anything.
 		        	if (selectedPlanets.length) {
 		        		// Remove it from the array of selectedPlanets
-			        	for (var b = 0; b < selectedPlanets.length; b++) {
-			        		if (selectedPlanets[b].id == planet.id) {
-			        			selectedPlanets.splice(b, 1);
-			        		}
-	 		        	}
+		        		for (var b = 0; b < selectedPlanets.length; b++) {
+		        			if (selectedPlanets[b].id == planet.id) {
+		        				selectedPlanets.splice(b, 1);
+		        			}
+		        		}
 	 		        	// Tell the world to de-select it.
-			            world.deselectPlanets([planet]);
- 		        	}
-		        }
-			}
-		}
+	 		        	world.deselectPlanets([planet]);
+	 		        }
+	 		    }
+	 		}
+	 	}
 	}
 }
 
@@ -153,20 +155,20 @@ function run() {
 	// if we are dragging then render the selection box.
 	if (dragStart != null && dragEnd != null) {
 		world.ctx.save();
-			world.ctx.strokeStyle = 'black';
-			world.ctx.beginPath();
-			world.ctx.moveTo(dragStart.x, dragStart.y);
-			world.ctx.lineTo(dragEnd.x, dragStart.y);
-			world.ctx.lineTo(dragEnd.x, dragEnd.y);
-			world.ctx.lineTo(dragStart.x, dragEnd.y);
-			world.ctx.lineTo(dragStart.x, dragStart.y);
-			world.ctx.stroke();
+		world.ctx.strokeStyle = 'black';
+		world.ctx.beginPath();
+		world.ctx.moveTo(dragStart.x, dragStart.y);
+		world.ctx.lineTo(dragEnd.x, dragStart.y);
+		world.ctx.lineTo(dragEnd.x, dragEnd.y);
+		world.ctx.lineTo(dragStart.x, dragEnd.y);
+		world.ctx.lineTo(dragStart.x, dragStart.y);
+		world.ctx.stroke();
 		world.ctx.restore();
 	}
 
 	requestAnimationFrame(function(timestamp) {
-      run();
-    })
+		run();
+	})
 }
 
 run();

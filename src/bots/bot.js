@@ -13,10 +13,10 @@ Bot.prototype.doTurn = function() {
 Bot.prototype.myFleets = function() {
 	var myFleets = [];
 
-	for (var i = 0; i < this.world.flocks.length; i++) {
+	for (var i = 0; i < this.world.fleets.length; i++) {
 
-		if (this.world.flocks[i].faction == this.faction) {
-			myFleets.push(this.world.flocks[i]);
+		if (this.world.fleets[i].faction == this.faction) {
+			myFleets.push(this.world.fleets[i]);
 		}
 	}
 
