@@ -8,6 +8,16 @@ export const radians = function(degrees) {
   return degrees * Math.PI / 180;
 };
 
+export const clamp = function(value,min,max) {
+    if (value > max) {
+        return max;
+    }
+    else if (value < min) {
+        return min;
+    }
+    return value;
+}
+
 export const map = function(n, start1, stop1, start2, stop2) {
   return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
 };

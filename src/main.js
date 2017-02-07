@@ -123,10 +123,12 @@ document.onmousemove = function(e) {
 	}
 }
 
-var bot = new bullyBot(world, 2);
+var blueBot = new bullyBot(world, 2);
+var redBot = new bullyBot(world, 1);
 
 world.run(function() {
-	bot.run();
+	blueBot.run();
+	redBot.run();
 });
 
 

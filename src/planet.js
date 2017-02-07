@@ -88,6 +88,7 @@ Planet.prototype.renderPlanet = function() {
 		this.ctx.arc(this.position.x, this.position.y, this.r, 0, 2 * Math.PI, false);
 		this.ctx.fill();
 		this.ctx.stroke();
+		this.ctx.closePath();
 	this.ctx.restore();
 }
 
@@ -141,7 +142,7 @@ Planet.prototype.spawnFighters = function(world, id) {
 		var fighterCount = this.fighters / 2;
 		var target = findByKey(world.planets, 'id', id);
 
-		var fleet = new Fleet(this.ctx, this.fill, this.faction);
+		var fleet = new Fleet(this.ctx, this.fill, this.faction, this.id);
 
 		for (var i = 0; i < fighterCount; i++) {
 			var newBoid = new Boid(this.ctx, this.position.x, this.position.y);

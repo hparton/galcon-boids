@@ -1,5 +1,5 @@
 import { Vector } from './vector.js';
-import { rand, radians } from './js/utils';
+import { rand, radians, clamp } from './js/utils';
 
 var windowWidth = window.innerWidth;
 var windowHeight = window.innerHeight;
@@ -10,8 +10,10 @@ export const Boid = function(ctx, x, y) {
 	this.velocity = new Vector(rand(-1,1,0.1), rand(-1,1,0.1));
 	this.position = new Vector(x,y);
 	this.r = 3.0;
-	this.maxspeed = 3; // Max Speed
+	this.maxspeed = 2; // Max Speed
 	this.maxforce = 0.05; // Max steering force
+	this.viewDistance = 50;
+	this.separationDistance = 30.0;
 }
 
 Boid.prototype.run = function(boids, objects) {
@@ -35,6 +37,31 @@ Boid.prototype.render = function() {
 		this.ctx.closePath();
 		this.ctx.stroke();
 	this.ctx.restore();
+
+	this.renderAvoidanceArea();
+}
+
+Boid.prototype.renderAvoidanceArea = function(){
+	this.ctx.save();
+		this.ctx.strokeStyle = 'rgba(255,0,0,0.2)'
+	    //Field of view
+		this.ctx.beginPath();
+	    this.ctx.moveTo(this.position.x+this.viewDistance,this.position.y);
+	    this.ctx.arc(this.position.x, this.position.y, this.viewDistance, 0, 2 * Math.PI);
+	    this.ctx.stroke();
+	    this.ctx.closePath();
+
+		this.ctx.beginPath();
+		this.ctx.strokeStyle = 'rgba(0,0,255,0.2)'
+	    //Separation distance
+	    this.ctx.moveTo(this.position.x+this.separationDistance,this.position.y);
+	    this.ctx.arc(this.position.x, this.position.y, this.separationDistance, 0, 2 * Math.PI);
+	    this.ctx.stroke();
+	    this.ctx.closePath();
+
+
+	this.ctx.restore();
+
 }
 
 Boid.prototype.applyForce = function(force) {
@@ -58,7 +85,7 @@ Boid.prototype.flock = function(boids, objects) {
 	sep.multiply(3);
 	coh.multiply(1.5);
 	ali.multiply(1);
-	// avo.multiply(5);
+	avo.multiply(5);
 
 	this.applyForce(sep);
 	this.applyForce(ali);
@@ -121,7 +148,7 @@ Boid.prototype.cohesion = function(boids) {
 
 // Seperate
 Boid.prototype.seperate = function(boids) {
-	var desiredSeperation = this.r * 8;
+	var desiredSeperation = this.r + this.separationDistance;
 	var steer = new Vector(0,0);
 	var count = 0;
 
@@ -150,67 +177,55 @@ Boid.prototype.seperate = function(boids) {
 	return steer;
  }
 
- Boid.prototype.avoid = function(objects) {
- 	var lowest = 0;
- 	var closest = {};
- 	var steer = new Vector(0,0);
+Boid.prototype.avoid = function(objects) {
+	var obstacles = objects;
 
-	for (var i = 0; i < objects.length; i++) {
-		var distance = Vector.distance(this.position, objects[i].position);
+	for (var i = 0; i < obstacles.length; i++) {
+		var r = Vector.subtract(obstacles[i].position, this.position);
 
-		if (lowest === 0 || distance < lowest) {
-			lowest = distance;
-			closest = objects[i];
+		if (r.length() < (this.viewDistance + obstacles[i].r)) {
+			if (this.source !== obstacles[i].id) {
+				if (obstacles[i].attracting.indexOf(this.fleet_id) == -1) {
+					var safetyDistance = obstacles[i].r*1.80;
+					var theta = r.angleTo(this.velocity);
+					var z = r.length() * Math.sin(theta);
+
+					if (Math.abs(z) < safetyDistance) {
+						if (Math.abs(theta) < Math.PI / 2) {
+          
+							var ratio = safetyDistance / r.length();
+          
+							var newTheta = Math.asin(clamp(ratio, -1, 1));
+          
+							newTheta = Math.abs(theta - newTheta) * (theta > 0 ? 1 : -1);
+          
+							var newDir = new Vector(
+								this.velocity.x * Math.cos(newTheta) - this.velocity.y * Math.sin(newTheta),
+								this.velocity.x * Math.sin(newTheta) + this.velocity.y * Math.cos(newTheta)
+							);
+          
+              newDir.normalize();
+              newDir.multiply(this.maxspeed);
+              newDir.subtract(this.velocity);
+              newDir.limit(this.maxforce);
+              return newDir;
+						}
+					}
+				}
+			}
 		}
 	}
-	// Check if we are attracting anything, we don't need to do anything if its an attracter
-	// because we want to smash into the planet anyway.
-	if (closest.attracting.indexOf(this.fleet_id) == -1 && lowest < closest.r + closest.r * 1.2) {
-		// this.fill = 'green';
 
-		// start checking 40px ahead
-		var predict = this.velocity.clone();
-		predict.multiply(50);
-		var futureposition = Vector.add(this.position, predict);
-		var futuredistance = Vector.distance(futureposition, closest.position);
-
-        // ctx.beginPath();
-        // ctx.arc(futureposition.x, futureposition.y, 3, 0, 2 * Math.PI, false);
-        // ctx.fillStyle = 'green';
-        // ctx.fill();
-
-		if (futuredistance > closest.r) {
-			var diff = Vector.subtract(closest.position, this.position);
-			diff.normalize();
-			diff.multiply(this.velocity.mag());
-			diff.negative();
-
-			var desired = Vector.add(this.velocity, diff);
-			desired.normalize();
-			desired.multiply(lowest);
-			// desired.multiply(this.maxspeed);
-		}
-
-		if (desired != null) {
-			steer = Vector.subtract(desired, this.velocity);
-			steer.limit(this.maxforce);
-			return steer.multiply(1.3 * (lowest /7.5) );
-		} else {
-			return new Vector(0,0);
-		}
-
-	} else {
-		return new Vector(0,0);
-	}
-
- }
+	return new Vector(0,0);
+}
 
 Boid.prototype.update = function() {
   // Update velocity
   this.velocity.add(this.acceleration);
   // Limit speed
   this.velocity.limit(this.maxspeed);
+	// Add Velocity
   this.position.add(this.velocity);
-  // Reset accelertion to 0 each cycle
+  // Reset acceleration to 0 each cycle
   this.acceleration.set(0,0);
 }
