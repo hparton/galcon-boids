@@ -195,7 +195,7 @@ Planet.prototype.attract = function(fleet, callback) {
   var zone = this.r;
   if (fleet) {
     for (var i = 0; i < fleet.boids.length; i++) {
-      fleet.boids[i].applyForce(fleet.boids[i].seek(this.position).multiply(2))
+      fleet.boids[i].applyForce(fleet.boids[i].seek(this.position).multiply(2.5))
       if (callback) {
 				// No point checking distance if we don't have a callback.
         var distance = Vector.distance(this.position, fleet.boids[i].position);

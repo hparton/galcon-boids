@@ -24,7 +24,7 @@ export const Boid = function(ctx, x, y, val) {
 Boid.prototype.run = function(boids, objects) {
   this.flock(boids, objects);
   this.update();
-  this.borders();
+  // this.borders();
   this.render();
 }
 

@@ -23,7 +23,7 @@ World.prototype.setup = function(width, height) {
   this.ctx.canvas.height = height;
 
 	// Do everything we need to on first load to get the game ready.
-  for (var i = 0; i < 10; i++) {
+  for (var i = 0; i < 15; i++) {
 
     var newCords = this.generateRandomPosition(width, height, true);
 

@@ -10,29 +10,39 @@ Bot.prototype.doTurn = function() {
   throw 'No function overwriting doTurn, stopping here. Make sure you set a botType.prototype.doTurn on the new bot type';
 }
 
+Bot.prototype.underAttack = function(planet) {
+  planet.attracting.map((fleet) => {
+    if (fleet.faction !== this.faction) {
+      return true;
+    }
+  })
+  
+  return false;
+}
+
 // Return an array of all my fleets in flight.
 Bot.prototype.myFleets = function() {
-  var myFleets = [];
+  var fleets = [];
   
   this.world.fleets.map((fleet) => {
     if (fleet.faction === this.faction) {
-      myFleets.push(fleet);      
+      fleets.push(fleet);      
     }
   })
 
-  return myFleets;
+  return fleets;
 }
 
 Bot.prototype.enemyFleets = function () {
-  var myFleets = [];
+  var fleets = [];
   
   this.world.fleets.map((fleet) => {
     if (fleet.faction === this.enemy) {
-      myFleets.push(fleet);      
+      fleets.push(fleet);      
     }
   })
 
-  return myFleets;
+  return fleets;
 }
 
 Bot.prototype.shipCount = function (planets, fleets) {
