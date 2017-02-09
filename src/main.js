@@ -120,7 +120,6 @@ document.onmousemove = function(e) {
   }
 }
 
-var blueBot = new bullyBot(world, 2, 1);
 var redBot = new dualBot(world, 1, 2);
 var running = false;
 
@@ -128,14 +127,28 @@ world.run(function() {
 
 });
 
-document.addEventListener('click', function() {
-  if (!running) {
-    document.getElementsByClassName('overlay')[0].remove()
-    blueBot.run();
-    redBot.run();
-    running = true;
-  }
-})
+var buttons = document.getElementsByClassName('js-start');
+
+for (var i = 0; i < buttons.length; i++) {
+  buttons[i].addEventListener('click', function(e) {
+    var difficulty = e.target.dataset.difficulty;
+
+    if (difficulty === 'easy') {
+      let blueBot = new bullyBot(world, 2, 1);
+      blueBot.run();
+    }
+    
+    if (difficulty === 'hard') {
+      let blueBot = new dualBot(world, 2, 1);
+      blueBot.run();
+    }
+    
+    document.getElementsByClassName('overlay')[0].remove();
+      
+    // redBot.run();
+  })
+}
+
 
 
 // IMPORTANT NOTE:

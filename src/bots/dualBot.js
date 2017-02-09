@@ -7,7 +7,7 @@ export const dualBot = function () {
 dualBot.prototype = Object.create(Bot.prototype);
 
 dualBot.prototype.doTurn = function() {
-  var fleetLimit = 1;
+  var fleetLimit = 3;
   var attackMode = false;
   
   var myShipCount = this.shipCount(this.myPlanets(), this.myFleets())
@@ -17,14 +17,14 @@ dualBot.prototype.doTurn = function() {
   
   if (myShipCount > enemyShipCount) {
     if (myProduction > enemyProduction) {
-      fleetLimit = 1;
+      fleetLimit = 3;
       attackMode = true;
     } else {
-      fleetLimit = 3;
+      fleetLimit = 5;
     }
   } else {
     if (myProduction > enemyProduction) {
-      fleetLimit = 1;
+      fleetLimit = 3;
     } else {
       fleetLimit = 5;
     }

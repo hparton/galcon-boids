@@ -11,12 +11,13 @@ Bot.prototype.doTurn = function() {
 }
 
 Bot.prototype.underAttack = function(planet) {
-  planet.attracting.map((fleet) => {
-    if (fleet.faction !== this.faction) {
-      return true;
-    }
-  })
-  
+  if (this.myPlanets().length > 1) { 
+    planet.attracting.map((fleet) => {
+      if (fleet.faction !== this.faction) {
+        return true;
+      }
+    })
+  }
   return false;
 }
 

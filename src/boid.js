@@ -88,7 +88,7 @@ Boid.prototype.flock = function(boids, objects) {
   sep.multiply(3.6);
   coh.multiply(1);
   ali.multiply(1);
-  avo.multiply(10);
+  avo.multiply(20);
   
   this.applyForce(sep);
   this.applyForce(ali);

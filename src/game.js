@@ -24,13 +24,12 @@ World.prototype.setup = function(width, height) {
 
 	// Do everything we need to on first load to get the game ready.
   for (var i = 0; i < 15; i++) {
-
     var newCords = this.generateRandomPosition(width, height, true);
 
     if (i == 1) {
-      this.addPlanet(newCords.x, newCords.y, 60, 1, 100);
+      this.addPlanet(rand(width - 200, width - 70), rand(70, height - 70), 60, 1, 100);
     } else if (i == 2) {
-      this.addPlanet(newCords.x, newCords.y, 60, 2, 100);
+      this.addPlanet(rand(70, 200), rand(70, height - 70), 60, 2, 100);
     } else {
       this.addPlanet(newCords.x, newCords.y, rand(20, 40), null);
     }
