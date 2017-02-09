@@ -2,126 +2,133 @@ import {Planet} from './planet';
 import {Vector} from './vector';
 import {rand} from './js/utils';
 
-export const World = function(canvas, width, height) {
-	this.canvas = canvas;
-	this.ctx = canvas.getContext('2d');
-	this.planets = [];
-	this.fleets = [];
 
-	this.setup(width, height);
+// eslint-disable-next-line no-undef
+var stats = new Stats();
+stats.showPanel( 0 );
+document.body.appendChild( stats.dom );
+
+
+export const World = function(canvas, width, height) {
+  this.canvas = canvas;
+  this.ctx = canvas.getContext('2d');
+  this.planets = [];
+  this.fleets = [];
+
+  this.setup(width, height);
 }
 
 World.prototype.setup = function(width, height) {
-	this.ctx.canvas.width = width;
-	this.ctx.canvas.height = height;
+  this.ctx.canvas.width = width;
+  this.ctx.canvas.height = height;
 
 	// Do everything we need to on first load to get the game ready.
-	for (var i = 0; i < 10; i++) {
+  for (var i = 0; i < 10; i++) {
 
-		var newCords = this.generateRandomPosition(width, height, true);
+    var newCords = this.generateRandomPosition(width, height, true);
 
-		if (i == 1) {
-			this.addPlanet(newCords.x, newCords.y, 60, 1, 100);
-		} else if (i == 2) {
-			this.addPlanet(newCords.x, newCords.y, 60, 2, 100);
-		} else {
-			this.addPlanet(newCords.x, newCords.y, rand(20, 40), null);
-		}
-	}
+    if (i == 1) {
+      this.addPlanet(newCords.x, newCords.y, 60, 1, 100);
+    } else if (i == 2) {
+      this.addPlanet(newCords.x, newCords.y, 60, 2, 100);
+    } else {
+      this.addPlanet(newCords.x, newCords.y, rand(20, 40), null);
+    }
+  }
 }
 
 World.prototype.generateRandomPosition = function(width, height, unique) {
-	var cords = {};
-	cords.x = rand(70, (width - 70), 1);
-	cords.y = rand(70, (height - 70), 1);
+  var cords = {};
+  cords.x = rand(70, (width - 70), 1);
+  cords.y = rand(70, (height - 70), 1);
 
-	if (unique && this.planets.length) {
-		for (var i = 0; i < this.planets.length; i++) {
-			if (
+  if (unique && this.planets.length) {
+    for (var i = 0; i < this.planets.length; i++) {
+      if (
 				this.planets[i].position.x < cords.x + this.planets[i].r && this.planets[i].position.x > cords.x - this.planets[i].r  ||
 				this.planets[i].position.y < cords.y + this.planets[i].r && this.planets[i].position.y > cords.y - this.planets[i].r
 			) {
-				cords = this.generateRandomPosition(width, height, true);
-			}
-		}
-	}
+        cords = this.generateRandomPosition(width, height, true);
+      }
+    }
+  }
 
-	return cords;
+  return cords;
 }
 
 World.prototype.step = function() {
-	this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  stats.begin();
+  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-	for (var i = 0; i < this.fleets.length; i++) {
-		this.fleets[i].run(this.planets);
-		this.fleets[i].delete(this.fleets, i);
-	}
+  for (let i = 0; i < this.fleets.length; i++) {
+    this.fleets[i].run(this.planets);
+    this.fleets[i].delete(this.fleets, i);
+  }
 
-	for (var i = 0; i < this.planets.length; i++) {
-		this.planets[i].run(this.fleets);
-	}
-
-	var self = this;
-    requestAnimationFrame(function(timestamp) {
-      self.step()
-    })
+  for (let i = 0; i < this.planets.length; i++) {
+    this.planets[i].run(this.fleets);
+  }
+  
+  stats.end();
+  
+  requestAnimationFrame(() => {
+    this.step()
+  })
 }
 
 World.prototype.run = function(callback) {
-	if (callback) {
-	    callback();
-	}
-    this.step()
+  if (callback) {
+    callback();
+  }
+  this.step()
 }
 
 World.prototype.addPlanet = function(x, y, radius, faction, fighters) {
-	var newPlanet = new Planet(this.ctx, x, y, radius, faction, fighters);
-	this.planets.push(newPlanet);
+  var newPlanet = new Planet(this.ctx, x, y, radius, faction, fighters);
+  this.planets.push(newPlanet);
 }
 
 World.prototype.selectPlanets = function(planets) {
-	for (var i = 0; i < planets.length; i++) {
-		planets[i].selected = true;
-	}
+  for (var i = 0; i < planets.length; i++) {
+    planets[i].selected = true;
+  }
 }
 
 World.prototype.deselectPlanets = function(planets) {
-	for (var i = 0; i < planets.length; i++) {
-		planets[i].selected = false;
-	}
+  for (var i = 0; i < planets.length; i++) {
+    planets[i].selected = false;
+  }
 }
 
 World.prototype.issueOrder = function(planet, target) {
-	planet.spawnFighters(this, target.id);
+  planet.spawnFighters(this, target.id);
 }
 
 World.prototype.getMousePosition = function(x,y) {
-	return new Vector(x, y);
+  return new Vector(x, y);
 }
 
 World.prototype.findClosestPlanet = function(x,y) {
-	var mousePosition = this.getMousePosition(x, y);
-	var lowest = 0;
-	var index = 0;
-	var closest = null;
+  var mousePosition = this.getMousePosition(x, y);
+  var lowest = 0;
+  var closest = null;
 
-	for (var i = 0; i < this.planets.length; i++) {
-		var distance = Vector.distance(mousePosition, this.planets[i].position);
+  for (var i = 0; i < this.planets.length; i++) {
+    let distance = Vector.distance(mousePosition, this.planets[i].position);
 
-		if (lowest === 0 || distance < lowest) {
-			lowest = distance;
-			closest = this.planets[i];
-			index = [i];
-		}
-	}
+    if (lowest === 0 || distance < lowest) {
+      lowest = distance;
+      closest = this.planets[i];
+    }
+  }
 
-	var distance = Vector.distance(mousePosition, closest.position);
+  let closestDistance = Vector.distance(mousePosition, closest.position);
 
-	if ((distance > 0) && (distance < closest.r)) {
-		return closest;
-	} else {
-		return null;
-	}
+  if ((closestDistance > 0) && (closestDistance < closest.r)) {
+    return closest;
+  } else {
+    return null;
+  }
 }
 
 

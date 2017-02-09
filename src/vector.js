@@ -106,6 +106,18 @@ Vector.prototype = {
   	  	}
   	  	return this;
 	},
+	heading: function (mode) {
+	  var h = Math.atan2(this.y, this.x);
+    return h * (180/Math.PI);
+	},
+	rotate: function (a) {
+	  var newHeading = this.heading() + a;
+	      newHeading = newHeading * (Math.PI/180);
+	  var mag = this.mag();
+	  this.x = Math.cos(newHeading) * mag;
+	  this.y = Math.sin(newHeading) * mag;
+	  return this;
+	},
 	toAngles: function() {
 		return -Math.atan2(-this.y, this.x);
 	},

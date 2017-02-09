@@ -1,67 +1,70 @@
 import { Vector } from './vector.js';
-import { rand, radians, clamp } from './js/utils';
+import { rand, radians } from './js/utils';
 
-var windowWidth = window.innerWidth;
-var windowHeight = window.innerHeight;
+// Improve draw performance by batch rendering instead of doing it on each
+// Remove the rotation and manually rework ?
 
-export const Boid = function(ctx, x, y) {
-	this.ctx = ctx;
-	this.acceleration = new Vector(0,0);
-	this.velocity = new Vector(rand(-1,1,0.1), rand(-1,1,0.1));
-	this.position = new Vector(x,y);
-	this.r = 3.0;
-	this.maxspeed = 2; // Max Speed
-	this.maxforce = 0.05; // Max steering force
-	this.viewDistance = 50;
-	this.separationDistance = 30.0;
+export const Boid = function(ctx, x, y, val) {
+  this.ctx = ctx;
+  this.value = val;
+  this.acceleration = new Vector(0,0);
+  this.velocity = new Vector(rand(-1,1,0.1), rand(-1,1,0.1));
+  this.position = new Vector(x,y);
+  if (this.value >= 10) {
+    this.r = 6.0;		
+  } else {
+    this.r = 3.0;
+  }
+  this.maxspeed = 2; // Max Speed
+  this.maxforce = 0.04; // Max steering force
+  this.viewDistance = 8;
+  this.separationDistance = 30.0;
 }
 
 Boid.prototype.run = function(boids, objects) {
-	this.flock(boids, objects);
-	this.update();
-	this.borders();
-	this.render();
+  this.flock(boids, objects);
+  this.update();
+  this.borders();
+  this.render();
 }
 
 Boid.prototype.render = function() {
-  	var theta = this.velocity.toAngles() + radians(90);
+  let theta = this.velocity.toAngles() + radians(90);
 
-	this.ctx.strokeStyle = this.fill;
-	this.ctx.save();
-		this.ctx.translate(this.position.x + this.r/2,this.position.y + this.r/2);
-		this.ctx.rotate(theta);
-		this.ctx.beginPath();
-		this.ctx.moveTo(0, -this.r*2)
-		this.ctx.lineTo(-this.r,this.r*2);
-		this.ctx.lineTo(this.r,this.r*2);
-		this.ctx.closePath();
-		this.ctx.stroke();
-	this.ctx.restore();
+  this.ctx.strokeStyle = this.fill;
 
-	this.renderAvoidanceArea();
+  this.ctx.save();
+  this.ctx.translate(this.position.x + this.r/2,this.position.y + this.r/2);
+  this.ctx.rotate(theta);
+  this.ctx.beginPath();
+  this.ctx.moveTo(0, -this.r*2)
+  this.ctx.lineTo(-this.r,this.r*2);
+  this.ctx.lineTo(this.r,this.r*2);
+  this.ctx.closePath();
+  this.ctx.stroke();
+  this.ctx.restore();
+
+	// this.renderAvoidanceArea();
 }
 
 Boid.prototype.renderAvoidanceArea = function(){
-	this.ctx.save();
-		this.ctx.strokeStyle = 'rgba(255,0,0,0.2)'
-	    //Field of view
-		this.ctx.beginPath();
-	    this.ctx.moveTo(this.position.x+this.viewDistance,this.position.y);
-	    this.ctx.arc(this.position.x, this.position.y, this.viewDistance, 0, 2 * Math.PI);
-	    this.ctx.stroke();
-	    this.ctx.closePath();
+  this.ctx.save();
+  this.ctx.strokeStyle = 'rgba(255,0,0,0.2)'
+	//Field of view
+  this.ctx.beginPath();
+  this.ctx.moveTo(this.position.x+this.viewDistance,this.position.y);
+  this.ctx.arc(this.position.x, this.position.y, this.viewDistance, 0, 2 * Math.PI);
+  this.ctx.stroke();
+  this.ctx.closePath();
 
-		this.ctx.beginPath();
-		this.ctx.strokeStyle = 'rgba(0,0,255,0.2)'
-	    //Separation distance
-	    this.ctx.moveTo(this.position.x+this.separationDistance,this.position.y);
-	    this.ctx.arc(this.position.x, this.position.y, this.separationDistance, 0, 2 * Math.PI);
-	    this.ctx.stroke();
-	    this.ctx.closePath();
-
-
-	this.ctx.restore();
-
+  this.ctx.beginPath();
+  this.ctx.strokeStyle = 'rgba(0,0,255,0.2)'
+	//Seperation distance
+  this.ctx.moveTo(this.position.x+this.separationDistance,this.position.y);
+  this.ctx.arc(this.position.x, this.position.y, this.separationDistance, 0, 2 * Math.PI);
+  this.ctx.stroke();
+  this.ctx.closePath();
+  this.ctx.restore();
 }
 
 Boid.prototype.applyForce = function(force) {
@@ -77,146 +80,140 @@ Boid.prototype.borders = function() {
 }
 
 Boid.prototype.flock = function(boids, objects) {
-	var sep = this.seperate(boids);
-	var coh = this.cohesion(boids);
-	var ali = this.align(boids);
-	var avo = this.avoid(objects);
+  var sep = this.seperate(boids);
+  var coh = this.cohesion(boids);
+  var ali = this.align(boids);
+  var avo = this.avoid(objects);
 
-	sep.multiply(3);
-	coh.multiply(1.5);
-	ali.multiply(1);
-	avo.multiply(5);
-
-	this.applyForce(sep);
-	this.applyForce(ali);
-	this.applyForce(coh);
-	this.applyForce(avo);
+  sep.multiply(3.6);
+  coh.multiply(1);
+  ali.multiply(1);
+  avo.multiply(10);
+  
+  this.applyForce(sep);
+  this.applyForce(ali);
+  this.applyForce(coh);
+  this.applyForce(avo);
 }
 
 
 Boid.prototype.seek = function(target) {
-	var desired = Vector.subtract(target, this.position);
-	desired.normalize();
-	desired.multiply(this.maxspeed);
+  var desired = Vector.subtract(target, this.position);
+  desired.normalize();
+  desired.multiply(this.maxspeed);
 
-	var steer = Vector.subtract(desired, this.velocity);
-	steer.limit(this.maxforce);
-	return steer;
+  var steer = Vector.subtract(desired, this.velocity);
+  steer.limit(this.maxforce);
+  return steer;
 }
 
 // Alignment
 Boid.prototype.align = function(boids) {
-	var sum = new Vector(0,0);
-	var count = 0;
+  var sum = new Vector(0,0);
+  var count = 0;
 
-	for (var i = 0; i < boids.length; i++) {
-		sum.add(boids[i].velocity);
-		count++;
-	}
+  for (var i = 0; i < boids.length; i++) {
+    sum.add(boids[i].velocity);
+    count++;
+  }
 
-	if (count > 0) {
-		sum.divide(count);
-		sum.normalize();
-		sum.multiply(this.maxspeed);
+  if (count > 0) {
+    sum.divide(count);
+    sum.normalize();
+    sum.multiply(this.maxspeed);
 
-		var steer = Vector.subtract(sum, this.velocity);
-		steer.limit(this.maxforce);
-		return steer;
-	} else {
-		return new Vector(0,0);
-	}
+    var steer = Vector.subtract(sum, this.velocity);
+    steer.limit(this.maxforce);
+    return steer;
+  } else {
+    return new Vector(0,0);
+  }
 }
 
 // Cohesion
 Boid.prototype.cohesion = function(boids) {
-	var sum = new Vector(0,0);
-	var count = 0;
+  var sum = new Vector(0,0);
+  var count = 0;
 
-	for (var i = 0; i < boids.length; i++) {
-		sum.add(boids[i].position);
-		count++;
-	}
+  for (var i = 0; i < boids.length; i++) {
+    sum.add(boids[i].position);
+    count++;
+  }
 
-	if (count > 0) {
-		sum.divide(count);
-		return this.seek(sum);
-	} else {
-		return new Vector(0,0);
-	}
+  if (count > 0) {
+    sum.divide(count);
+    return this.seek(sum);
+  } else {
+    return new Vector(0,0);
+  }
 }
 
 
 // Seperate
 Boid.prototype.seperate = function(boids) {
-	var desiredSeperation = this.r + this.separationDistance;
-	var steer = new Vector(0,0);
-	var count = 0;
+  var desiredSeperation = this.r + this.separationDistance;
+  var steer = new Vector(0,0);
+  var count = 0;
 
-	for (var i = 0; i < boids.length; i++) {
-		var distance = Vector.distance(this.position, boids[i].position);
-		if ((distance > 0) && (distance < desiredSeperation)) {
-			var diff = Vector.subtract(this.position, boids[i].position);
-			diff.normalize();
-			diff.divide(distance);
-			steer.add(diff);
-			count++;
-		}
-	}
+  for (var i = 0; i < boids.length; i++) {
+    var distance = Vector.distance(this.position, boids[i].position);
+    if ((distance > 0) && (distance < desiredSeperation)) {
+      var diff = Vector.subtract(this.position, boids[i].position);
+      diff.normalize();
+      diff.divide(distance);
+      steer.add(diff);
+      count++;
+    }
+  }
 
-	if (count > 0) {
-		steer.divide(count);
-	}
+  if (count > 0) {
+    steer.divide(count);
+  }
 
-	if (steer.mag() > 0) {
-		steer.normalize();
-		steer.multiply(this.maxspeed);
-		steer.subtract(this.velocity);
-		steer.limit(this.maxforce);
-	}
+  if (steer.mag() > 0) {
+    steer.normalize();
+    steer.multiply(this.maxspeed);
+    steer.subtract(this.velocity);
+    steer.limit(this.maxforce);
+  }
 
-	return steer;
- }
+  return steer;
+}
 
 Boid.prototype.avoid = function(objects) {
-	var obstacles = objects;
+  var heading = this.velocity.heading();
+  var lowest = 0;
+  var closest = null;
+  
+  for (var i = 0; i < objects.length; i++) {
+    var distance = Vector.distance(this.position, objects[i].position);
 
-	for (var i = 0; i < obstacles.length; i++) {
-		var r = Vector.subtract(obstacles[i].position, this.position);
+    if (lowest === 0 || distance < lowest) {
+      lowest = distance;
+      closest = objects[i];
+    }
+  }    
+  if (this.source !== closest.id &&
+      closest.attracting.indexOf(this.fleet_id) == -1
+  ) {
+    var rel = closest.position.clone().subtract(this.position);
+      
+    rel.rotate(-heading);
+    var inFront = rel.x > 0;
+    var inRange = rel.length() < (this.viewDistance + closest.r + (closest.r / 8));
+    
+    if (inFront && inRange) {
+      var desired = rel.set(0, -rel.y);
+      desired.rotate(heading)
 
-		if (r.length() < (this.viewDistance + obstacles[i].r)) {
-			if (this.source !== obstacles[i].id) {
-				if (obstacles[i].attracting.indexOf(this.fleet_id) == -1) {
-					var safetyDistance = obstacles[i].r*1.80;
-					var theta = r.angleTo(this.velocity);
-					var z = r.length() * Math.sin(theta);
+      var steer =  Vector.subtract(desired, this.velocity);
+      steer.limit(this.maxforce);
+      
+      return steer;
+    }
+  }
+  return new Vector()
 
-					if (Math.abs(z) < safetyDistance) {
-						if (Math.abs(theta) < Math.PI / 2) {
-          
-							var ratio = safetyDistance / r.length();
-          
-							var newTheta = Math.asin(clamp(ratio, -1, 1));
-          
-							newTheta = Math.abs(theta - newTheta) * (theta > 0 ? 1 : -1);
-          
-							var newDir = new Vector(
-								this.velocity.x * Math.cos(newTheta) - this.velocity.y * Math.sin(newTheta),
-								this.velocity.x * Math.sin(newTheta) + this.velocity.y * Math.cos(newTheta)
-							);
-          
-              newDir.normalize();
-              newDir.multiply(this.maxspeed);
-              newDir.subtract(this.velocity);
-              newDir.limit(this.maxforce);
-              return newDir;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return new Vector(0,0);
 }
 
 Boid.prototype.update = function() {

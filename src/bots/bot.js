@@ -1,61 +1,119 @@
-import {findByKey} from '../js/utils';
+// TODO: Fair ol' bit of duplication in here that could be reduced and just have aliases to one function
 
-export const Bot = function(world, faction) {
-	this.faction = faction;
-	this.world = world;
+export const Bot = function(world, faction, enemy) {
+  this.faction = faction;
+  this.enemy = enemy;
+  this.world = world;
 }
 
 Bot.prototype.doTurn = function() {
-	throw "No function overwriting doTurn, stopping here. Make sure you set a botType.prototype.doTurn on the new bot type";
+  throw 'No function overwriting doTurn, stopping here. Make sure you set a botType.prototype.doTurn on the new bot type';
 }
 
 // Return an array of all my fleets in flight.
 Bot.prototype.myFleets = function() {
-	var myFleets = [];
+  var myFleets = [];
+  
+  this.world.fleets.map((fleet) => {
+    if (fleet.faction === this.faction) {
+      myFleets.push(fleet);      
+    }
+  })
 
-	for (var i = 0; i < this.world.fleets.length; i++) {
+  return myFleets;
+}
 
-		if (this.world.fleets[i].faction == this.faction) {
-			myFleets.push(this.world.fleets[i]);
-		}
-	}
+Bot.prototype.enemyFleets = function () {
+  var myFleets = [];
+  
+  this.world.fleets.map((fleet) => {
+    if (fleet.faction === this.enemy) {
+      myFleets.push(fleet);      
+    }
+  })
 
-	return myFleets;
+  return myFleets;
+}
+
+Bot.prototype.shipCount = function (planets, fleets) {
+  var shipCount = 0;
+  
+  planets.map((planet) => {
+    shipCount += planet.fighters;
+  })
+  
+  fleets.map((fleet) => {
+    fleet.boids.map((boid) => {
+      shipCount += boid.value;
+    })
+  })
+  
+  return shipCount;
 }
 
 // Return an array of just my planets.
 Bot.prototype.myPlanets = function() {
-	var myPlanets = [];
+  var planets = [];
 
-	for (var i = 0; i < this.world.planets.length; i++) {
+  this.world.planets.map((planet) => {
+    if (planet.faction === this.faction) {
+      planets.push(planet);
+    }
+  })
 
-		if (this.world.planets[i].faction == this.faction) {
-			myPlanets.push(this.world.planets[i]);
-		}
-	}
-
-	return myPlanets;
+  return planets;
 }
 
 // Return an array of enemy and neutral planets
 Bot.prototype.notMyPlanets = function() {
-	var notMyPlanets = [];
+  var planets = [];
 
-	for (var i = 0; i < this.world.planets.length; i++) {
+  this.world.planets.map((planet) => {
+    if (planet.faction !== this.faction) {
+      planets.push(planet);
+    }
+  })
 
-		if (this.world.planets[i].faction != this.faction) {
-			notMyPlanets.push(this.world.planets[i]);
-		}
-	}
+  return planets;
+}
 
-	return notMyPlanets;
+Bot.prototype.enemyPlanets = function() {
+  var planets = [];
+
+  this.world.planets.map((planet) => {
+    if (planet.faction === this.enemy) {
+      planets.push(planet);
+    }
+  })
+
+  return planets;
+}
+
+Bot.prototype.myProduction = function() {
+  return this.production(this.faction);
+}
+
+Bot.prototype.enemyProduction = function() {
+  return this.production(this.enemy);
+};
+
+Bot.prototype.production = function(faction) {
+  var productionCount = 0;
+  
+  this.world.planets.map((planet) => {
+    if (planet.faction === faction) {
+      productionCount += planet.growthRate;
+    }
+  })
+  
+  return productionCount;
 }
 
 Bot.prototype.run = function() {
-	this.doTurn();
+  this.doTurn();
 
-	var self = this;
-	requestAnimationFrame(function(timestamp) {
-	 	self.run();
-	})
+  var self = this;
+  requestAnimationFrame(function() {
+    self.run();
+  })
 }
