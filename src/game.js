@@ -1,12 +1,12 @@
 import {Planet} from './planet';
 import {Vector} from './vector';
 import {rand} from './js/utils';
-
+import Stats from 'stats-js';
 
 // eslint-disable-next-line no-undef
 var stats = new Stats();
-stats.showPanel( 0 );
-document.body.appendChild( stats.dom );
+stats.setMode( 0 );
+document.body.appendChild( stats.domElement );
 
 
 export const World = function(canvas, width, height) {
@@ -67,9 +67,9 @@ World.prototype.step = function() {
   for (let i = 0; i < this.planets.length; i++) {
     this.planets[i].run(this.fleets);
   }
-  
+
   stats.end();
-  
+
   requestAnimationFrame(() => {
     this.step()
   })
