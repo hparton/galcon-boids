@@ -1,5 +1,5 @@
-import { Vector } from './vector.js';
-import { rand, radians } from './js/utils';
+import { Vector } from './vector';
+import { rand, radians } from './utils';
 
 // Improve draw performance by batch rendering instead of doing it on each
 // Remove the rotation and manually rework ?
@@ -11,7 +11,7 @@ export const Boid = function(ctx, x, y, val) {
   this.velocity = new Vector(rand(-1,1,0.1), rand(-1,1,0.1));
   this.position = new Vector(x,y);
   if (this.value >= 10) {
-    this.r = 6.0;		
+    this.r = 6.0;
   } else {
     this.r = 3.0;
   }
@@ -89,7 +89,7 @@ Boid.prototype.flock = function(boids, objects) {
   coh.multiply(1);
   ali.multiply(1);
   avo.multiply(20);
-  
+
   this.applyForce(sep);
   this.applyForce(ali);
   this.applyForce(coh);
@@ -184,7 +184,7 @@ Boid.prototype.avoid = function(objects) {
   var heading = this.velocity.heading();
   var lowest = 0;
   var closest = null;
-  
+
   for (var i = 0; i < objects.length; i++) {
     var distance = Vector.distance(this.position, objects[i].position);
 
@@ -192,23 +192,23 @@ Boid.prototype.avoid = function(objects) {
       lowest = distance;
       closest = objects[i];
     }
-  }    
+  }
   if (this.source !== closest.id &&
       closest.attracting.indexOf(this.fleet_id) == -1
   ) {
     var rel = closest.position.clone().subtract(this.position);
-      
+
     rel.rotate(-heading);
     var inFront = rel.x > 0;
     var inRange = rel.length() < (this.viewDistance + closest.r + (closest.r / 8));
-    
+
     if (inFront && inRange) {
       var desired = rel.set(0, -rel.y);
       desired.rotate(heading)
 
       var steer =  Vector.subtract(desired, this.velocity);
       steer.limit(this.maxforce);
-      
+
       return steer;
     }
   }

@@ -1,6 +1,7 @@
 import {World} from './game';
-import {bullyBot} from './bots/bullyBot';
-import {dualBot} from './bots/dualBot';
+import {bullyBot} from '../../bots/bullyBot';
+import {dualBot} from '../../bots/dualBot';
+import {expandBot} from '../../bots/expandBot';
 
 var world = new World(document.getElementById('galcon'), window.innerWidth, window.innerHeight);
 
@@ -120,12 +121,16 @@ document.onmousemove = function(e) {
   }
 }
 
-var redBot = new dualBot(world, 1, 2);
+var redBot = new expandBot(world, 1);
 var running = false;
 
 world.run(function() {
 
 });
+
+document.addEventListener('click', function() {
+  console.log(world);
+})
 
 var buttons = document.getElementsByClassName('js-start');
 
@@ -134,17 +139,22 @@ for (var i = 0; i < buttons.length; i++) {
     var difficulty = e.target.dataset.difficulty;
 
     if (difficulty === 'easy') {
-      let blueBot = new bullyBot(world, 2, 1);
+      let blueBot = new bullyBot(world, 2);
       blueBot.run();
     }
-    
+
     if (difficulty === 'hard') {
-      let blueBot = new dualBot(world, 2, 1);
+      let blueBot = new dualBot(world, 2);
       blueBot.run();
     }
-    
+
+    if (difficulty === 'insane') {
+      let blueBot = new expandBot(world, 2);
+      blueBot.run();
+    }
+
     document.getElementsByClassName('overlay')[0].remove();
-      
+
     // redBot.run();
   })
 }

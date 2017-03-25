@@ -1,8 +1,7 @@
 // TODO: Fair ol' bit of duplication in here that could be reduced and just have aliases to one function
 
-export const Bot = function(world, faction, enemy) {
+export const Bot = function(world, faction) {
   this.faction = faction;
-  this.enemy = enemy;
   this.world = world;
 }
 
@@ -11,7 +10,7 @@ Bot.prototype.doTurn = function() {
 }
 
 Bot.prototype.underAttack = function(planet) {
-  if (this.myPlanets().length > 1) { 
+  if (this.myPlanets().length > 1) {
     planet.attracting.map((fleet) => {
       if (fleet.faction !== this.faction) {
         return true;
@@ -24,10 +23,10 @@ Bot.prototype.underAttack = function(planet) {
 // Return an array of all my fleets in flight.
 Bot.prototype.myFleets = function() {
   var fleets = [];
-  
+
   this.world.fleets.map((fleet) => {
     if (fleet.faction === this.faction) {
-      fleets.push(fleet);      
+      fleets.push(fleet);
     }
   })
 
@@ -36,10 +35,10 @@ Bot.prototype.myFleets = function() {
 
 Bot.prototype.enemyFleets = function () {
   var fleets = [];
-  
+
   this.world.fleets.map((fleet) => {
-    if (fleet.faction === this.enemy) {
-      fleets.push(fleet);      
+    if (fleet.faction !== this.faction) {
+      fleets.push(fleet);
     }
   })
 
@@ -48,17 +47,17 @@ Bot.prototype.enemyFleets = function () {
 
 Bot.prototype.shipCount = function (planets, fleets) {
   var shipCount = 0;
-  
+
   planets.map((planet) => {
     shipCount += planet.fighters;
   })
-  
+
   fleets.map((fleet) => {
     fleet.boids.map((boid) => {
       shipCount += boid.value;
     })
   })
-  
+
   return shipCount;
 }
 
@@ -92,7 +91,7 @@ Bot.prototype.enemyPlanets = function() {
   var planets = [];
 
   this.world.planets.map((planet) => {
-    if (planet.faction === this.enemy) {
+    if (planet.faction && planet.faction !== this.faction) {
       planets.push(planet);
     }
   })
@@ -101,24 +100,28 @@ Bot.prototype.enemyPlanets = function() {
 }
 
 Bot.prototype.myProduction = function() {
-  return this.production(this.faction);
-}
-
-Bot.prototype.enemyProduction = function() {
-  return this.production(this.enemy);
-};
-
-Bot.prototype.production = function(faction) {
   var productionCount = 0;
-  
+
   this.world.planets.map((planet) => {
-    if (planet.faction === faction) {
+    if (planet.faction === this.faction) {
       productionCount += planet.growthRate;
     }
   })
-  
+
   return productionCount;
 }
+
+Bot.prototype.enemyProduction = function() {
+  var productionCount = 0;
+
+  this.world.planets.map((planet) => {
+    if (planet.faction !== this.faction) {
+      productionCount += planet.growthRate;
+    }
+  })
+
+  return productionCount;
+};
 
 Bot.prototype.run = function() {
   this.doTurn();

@@ -3,8 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0"> -->
-  <link rel="stylesheet" href="./reset.css">
-	<link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./dist/app.css">
 	<title>Document</title>
 </head>
 <body>
@@ -12,15 +11,25 @@
   	<h1>SOLAR WARS</h1>
   	<h2>Totally not Galcon PLS NO SUE.</h2>
     <ul class="difficulty">
-      <li><a href="#" class="js-start" data-difficulty="easy">Easy</a></li>
+      <li><a href="#" class="js-start" data-difficulty="easy">Medium</a></li>
       <li><a href="#" class="js-start" data-difficulty="hard">Hard</a></li>
+      <li><a href="#" class="js-start" data-difficulty="insane">Insane</a></li>
     </ul>
   </div>
-  <!-- <img class="filter" src="dust2.jpg" alt=""> -->
+  <!-- Instead of using a dust filter use this effect: https://css-tricks.com/snippets/css/animated-grainy-texture/ -->
+  <!--
+    And an animated grid at the top/bottom
+    Like this:
+    https://secure.static.tumblr.com/6679499515636c7faa2e284fa35ca601/qx7nzxp/XjLnkb7g8/tumblr_static_tumblr_static_856we213bn0o0gswockg0cgoc_640.gif
+    https://media.giphy.com/media/Ade0JhR8mtsKQ/giphy.gif
+    https://68.media.tumblr.com/ff97ff243a57feb6a9f6e5b4794775a8/tumblr_ofas90Z1Kd1ujqvcvo1_500.gif
+    https://68.media.tumblr.com/b8af2666349d5f45343e16e786ad8425/tumblr_omt6dxBURZ1w29618o1_400.gif
+    https://s-media-cache-ak0.pinimg.com/originals/b8/42/73/b84273935ccb49148fa54da57d6234e4.jpg
+  -->
   <div class="percentage-indicator">
     <span>50</span><span>%</span>
   </div>
 	<canvas style="background-color: rgb(35, 35, 35)" id="galcon"></canvas>
-	<script src="./dist/bundle.js"></script>
+	<script src="./dist/app.js"></script>
 </body>
 </html>

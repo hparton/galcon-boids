@@ -7,7 +7,7 @@ export const bullyBot = function () {
 bullyBot.prototype = Object.create(Bot.prototype);
 
 bullyBot.prototype.doTurn = function() {
-  var fleetLimit = 5;
+  var fleetLimit = 999;
 
   if (this.notMyPlanets().length === 0) {
 		// document.location.reload();

@@ -1,6 +1,6 @@
 import {Planet} from './planet';
 import {Vector} from './vector';
-import {rand} from './js/utils';
+import {rand} from './utils';
 import Stats from 'stats-js';
 
 // eslint-disable-next-line no-undef
@@ -31,7 +31,7 @@ World.prototype.setup = function(width, height) {
     } else if (i == 2) {
       this.addPlanet(rand(70, 200), rand(70, height - 70), 60, 2, 100);
     } else {
-      this.addPlanet(newCords.x, newCords.y, rand(20, 40), null);
+      this.addPlanet(newCords.x, newCords.y, rand(20, 40), 0);
     }
   }
 }
@@ -99,8 +99,8 @@ World.prototype.deselectPlanets = function(planets) {
   }
 }
 
-World.prototype.issueOrder = function(planet, target) {
-  planet.spawnFighters(this, target.id);
+World.prototype.issueOrder = function(planet, target, count) {
+  planet.spawnFighters(this, target.id, count);
 }
 
 World.prototype.getMousePosition = function(x,y) {

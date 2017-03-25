@@ -1,3 +1,5 @@
+@import "reset.css";
+
 @font-face{
   font-family: 'Brush';
   src:
@@ -17,12 +19,11 @@
 }
 
 @font-face{
-  font-family: 'Shkoder';
+  font-family: 'VHS';
   src:
-    url('./fonts/shkoder_1989_light-webfont.woff2') format('woff2'),
-    url('./fonts/shkoder_1989_light-webfont.woff') format('woff');
-  font-style:normal;
-  font-weight:300
+    url('./fonts/vcr_osd_mono-webfont.woff2') format('woff2'),
+    url('./fonts/vcr_osd_mono-webfont.woff') format('woff');
+  font-style: normal;
 }
 
 h1 {
@@ -36,7 +37,7 @@ h1 {
 }
 
 h2 {
-  font-family: 'MUTHUR';
+  font-family: 'VHS';
   text-transform: uppercase;
   color: white;
   margin-top: 1em;
@@ -46,7 +47,7 @@ h2 {
 }
 
 .difficulty {
-  font-family: 'MUTHUR';
+  font-family: 'VHS';
   text-transform: uppercase;
   color: white;
   opacity: 0.8;
@@ -67,7 +68,7 @@ a {
 }
 
 .percentage-indicator {
-  font-family: 'MUTHUR';
+  font-family: 'VHS';
   opacity: 0.5;
   color: white;
   position: absolute;
@@ -107,4 +108,31 @@ a {
   top: 0;
   right: 0;
   bottom: 0;
+}
+
+
+/* .overlay:after {
+  animation: grain 8s steps(10) infinite;
+  background-image: url("https://godaytrip.com/images/home/noise.png");
+  content: "";
+  height: 300%;
+  left: -50%;
+  opacity: 0.3;
+  position: fixed;
+  top: -100%;
+  width: 300%;
+  pointer-events: none;
+} */
+
+@keyframes grain {
+  0%, 100% { transform:translate(0, 0) }
+  10% { transform:translate(-5%, -10%) }
+  20% { transform:translate(-15%, 5%) }
+  30% { transform:translate(7%, -25%) }
+  40% { transform:translate(-5%, 25%) }
+  50% { transform:translate(-15%, 10%) }
+  60% { transform:translate(15%, 0%) }
+  70% { transform:translate(0%, 15%) }
+  80% { transform:translate(3%, 35%) }
+  90% { transform:translate(-10%, 10%) }
 }

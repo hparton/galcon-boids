@@ -1,4 +1,4 @@
-import {guid, findByKey, rand} from './js/utils';
+import {guid, findByKey, rand} from './utils';
 import {Vector} from './vector';
 import {Fleet} from './fleet';
 import {Boid} from './boid';
@@ -81,17 +81,17 @@ Planet.prototype.renderPlanet = function() {
   this.ctx.shadowBlur = 200;
   this.ctx.shadowColor = this.fill;
   this.ctx.beginPath();
-  this.ctx.moveTo(this.position.x + this.r * Math.cos(0), this.position.y + this.r * Math.sin(0));          
-     
+  this.ctx.moveTo(this.position.x + this.r * Math.cos(0), this.position.y + this.r * Math.sin(0));
+
   for (var i = 1; i <= numberOfSides; i++) {
     this.ctx.lineTo(this.position.x + this.r * Math.cos(i * 2 * Math.PI / numberOfSides), this.position.y + this.r * Math.sin(i * 2 * Math.PI / numberOfSides));
   }
-    
+
   this.ctx.fill();
   this.ctx.stroke();
   this.ctx.closePath();
   this.ctx.restore();
-    
+
 }
 
 Planet.prototype.updateFactionColor = function() {
@@ -137,12 +137,15 @@ Planet.prototype.decrementFighterCount = function(inc) {
   this.fighters -= inc;
 }
 
-Planet.prototype.spawnFighters = function(world, id) {
+Planet.prototype.spawnFighters = function(world, id, count) {
   if (this.faction && this.fighters >= 2) {
     var fighterCount = this.fighters / 2;
+    if (count) {
+      fighterCount = count;
+    }
     var target = findByKey(world.planets, 'id', id);
 
-    var fleet = new Fleet(this.ctx, this.fill, this.faction, this.id);
+    var fleet = new Fleet(this.ctx, this.fill, this.faction, this.id, target);
 
     // if (fighterCount >= 50) {
     //   for (let i = 0; i < (fighterCount / 10); i++) {

@@ -1,12 +1,14 @@
-import {guid} from './js/utils';
+import {guid} from './utils';
 
-export const Fleet = function (ctx, color, faction, source) {
+export const Fleet = function (ctx, color, faction, source, destination) {
   this.id = guid();
   this.source = source;
+  this.destination = destination;
   this.faction = faction;
   this.ctx = ctx;
   this.color = color;
   this.boids = [];
+  this.value = 0;
 }
 
 Fleet.prototype.run = function(bodies) {
@@ -26,6 +28,7 @@ Fleet.prototype.addBoid = function(boid) {
   boid.fill = this.color;
   boid.faction = this.faction;
   boid.source = this.source;
+  this.value += boid.value;
   this.boids.push(boid);
 }
 

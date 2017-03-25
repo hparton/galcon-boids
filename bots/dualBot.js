@@ -69,8 +69,6 @@ dualBot.prototype.doTurn = function() {
   // (4) Send half my ships from my strongest planet to the weakest planet
   // that i do not own.
   if (strongestPlanet != null && weakestPlanet != null) {
-    if (strongestPlanet.fighters > 15) {
-      this.world.issueOrder(strongestPlanet, weakestPlanet);
-    }
+    this.world.issueOrder(strongestPlanet, weakestPlanet);
   }
 }
